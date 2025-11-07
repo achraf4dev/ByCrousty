@@ -35,6 +35,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('{id}/edit', [AdminController::class, 'editUser'])->name('edit');
             Route::put('{id}', [AdminController::class, 'updateUser'])->name('update');
             Route::delete('{id}', [AdminController::class, 'deleteUser'])->name('delete');
+            
+            // Points management routes
+            Route::post('{id}/award-points', [AdminController::class, 'awardPoints'])->name('award-points');
         });
+        
+        // QR code and points routes
+        Route::get('qr-scanner', [AdminController::class, 'showQrScanner'])->name('qr-scanner');
+        Route::post('qr-scan', [AdminController::class, 'processQrScan'])->name('qr-scan');
+        Route::get('points-history', [AdminController::class, 'pointsHistory'])->name('points-history');
     });
 });

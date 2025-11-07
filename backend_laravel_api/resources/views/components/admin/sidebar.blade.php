@@ -25,6 +25,22 @@
             </li>
             
             <li>
+                <a href="{{ route('admin.qr-scanner') }}" 
+                   class="nav-link {{ request()->routeIs('admin.qr-scanner') ? 'active' : '' }}">
+                    <i class="bi bi-qr-code-scan me-2"></i>
+                    <span>Escáner QR</span>
+                </a>
+            </li>
+            
+            <li>
+                <a href="{{ route('admin.points-history') }}" 
+                   class="nav-link {{ request()->routeIs('admin.points-history') ? 'active' : '' }}">
+                    <i class="bi bi-trophy me-2"></i>
+                    <span>Historial Puntos</span>
+                </a>
+            </li>
+            
+            <li>
                 <a href="#" class="nav-link">
                     <i class="bi bi-gear me-2"></i>
                     <span>Configuración</span>

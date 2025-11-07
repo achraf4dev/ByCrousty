@@ -35,6 +35,7 @@ class User extends Authenticatable
         'phone_number',
         'email_verified_at',
         'qr_code_data',
+        'points',
     ];
 
     /**
@@ -56,6 +57,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'points' => 'integer',
     ];
 
     /**
@@ -99,6 +101,80 @@ class User extends Authenticatable
         
         // Return a URL that points to the existing QR code endpoint
         return url('/api/v1/users/my-qr-code');
+    }
+
+    /**
+     * Get the points history for this user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function pointsHistory()
+    {
+        return $this->hasMany(PointsHistory::class, 'user_id');
+    }
+
+    /**
+     * Get the points awarded by this admin.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function awardedPoints()
+    {
+        return $this->hasMany(PointsHistory::class, 'admin_id');
+    }
+
+    /**
+     * Add points to user and log the transaction.
+     *
+     * @param int $points
+     * @param int $adminId
+     * @param string $description
+     * @param string|null $qrCodeData
+     * @return bool
+     */
+    public function addPoints($points, $adminId, $description = null, $qrCodeData = null)
+    {
+        // Update user points
+        $this->increment('points', $points);
+
+        // Log the transaction
+        PointsHistory::create([
+            'user_id' => $this->id,
+            'admin_id' => $adminId,
+            'points' => $points,
+            'type' => 'manual',
+            'description' => $description,
+            'qr_code_data' => $qrCodeData,
+        ]);
+
+        return true;
+    }
+
+    /**
+     * Get total points earned this month.
+     *
+     * @return int
+     */
+    public function getPointsThisMonthAttribute()
+    {
+        return $this->pointsHistory()
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('points');
+    }
+
+    /**
+     * Get recent points history (last 10 transactions).
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getRecentPointsHistoryAttribute()
+    {
+        return $this->pointsHistory()
+            ->with('admin')
+            ->latest()
+            ->take(10)
+            ->get();
     }
 
 }

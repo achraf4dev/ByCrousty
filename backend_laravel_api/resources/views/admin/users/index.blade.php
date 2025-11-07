@@ -38,6 +38,7 @@
                             <th class="table-col-id">#</th>
                             <th>Usuario</th>
                             <th>Correo</th>
+                            <th>Puntos</th>
                             <th>Registrado</th>
                             <th>Estado</th>
                             <th class="table-col-actions">Acciones</th>
@@ -54,6 +55,11 @@
                                     </div>
                                 </td>
                                 <td class="table-text-muted-weight">{{ $user->email }}</td>
+                                <td class="text-center">
+                                    <span class="badge bg-primary fw-bold px-2 py-1">
+                                        {{ $user->points ?? 0 }} pts
+                                    </span>
+                                </td>
                                 <td class="table-text-muted">{{ $user->created_at->format('M d, Y') }}</td>
                                 <td>
                                     @if($user->email_verified_at)

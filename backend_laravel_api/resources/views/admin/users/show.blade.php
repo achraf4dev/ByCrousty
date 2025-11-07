@@ -65,6 +65,46 @@
                 </button>
             </div>
         </div>
+        
+        <!-- Points Card -->
+        <div class="card mt-3">
+            <div class="card-header bg-white card-header-border">
+                <h5 class="card-title mb-0 card-title-styled">
+                    <i class="bi bi-award me-2 card-icon-primary"></i>
+                    Puntos del Usuario
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <div class="display-6 fw-bold text-primary">{{ $user->points ?? 0 }}</div>
+                    <small class="text-muted">Puntos Totales</small>
+                </div>
+                
+                <!-- Award Points Form -->
+                <form method="POST" action="{{ route('admin.users.award-points', $user->id) }}">
+                    @csrf
+                    <div class="mb-3">
+                        <label class="form-label form-label-styled">Otorgar Puntos</label>
+                        <select name="points" class="form-control" required>
+                            <option value="">Seleccionar puntos...</option>
+                            <option value="100">100 Puntos</option>
+                            <option value="200">200 Puntos</option>
+                            <option value="300">300 Puntos</option>
+                            <option value="500">500 Puntos</option>
+                            <option value="1000">1000 Puntos</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label form-label-styled">Descripción (Opcional)</label>
+                        <input type="text" name="description" class="form-control" placeholder="Razón para otorgar puntos...">
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-award me-2"></i>
+                        Otorgar Puntos
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
     
     <!-- User Information -->
@@ -231,6 +271,58 @@
                         </button>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Points History -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-white card-header-border">
+                <h5 class="card-title mb-0 card-title-styled">
+                    <i class="bi bi-trophy me-2 card-icon-primary"></i>
+                    Historial de Puntos
+                </h5>
+            </div>
+            <div class="card-body">
+                @if($pointsHistory->count() > 0)
+                    <div class="points-timeline">
+                        @foreach($pointsHistory as $history)
+                        <div class="timeline-item mb-3">
+                            <div class="d-flex">
+                                <div class="timeline-icon {{ $history->points > 0 ? 'timeline-icon-success' : 'timeline-icon-warning' }} me-3">
+                                    <i class="bi {{ $history->points > 0 ? 'bi-plus-circle' : 'bi-dash-circle' }}"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <p class="mb-1 timeline-content-title">
+                                                {{ $history->points > 0 ? '+' : '' }}{{ $history->points }} puntos
+                                            </p>
+                                            <small class="text-muted">{{ $history->formatted_description }}</small>
+                                            <br>
+                                            <small class="timeline-content-date">
+                                                Por: {{ $history->admin->full_name }} - {{ $history->created_at->format('M j, Y g:i A') }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    
+                    @if($pointsHistory->hasPages())
+                    <div class="d-flex justify-content-center mt-3">
+                        {{ $pointsHistory->links() }}
+                    </div>
+                    @endif
+                @else
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-trophy-fill opacity-50" style="font-size: 2rem;"></i>
+                        <p class="mb-0 mt-2">No hay historial de puntos aún</p>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

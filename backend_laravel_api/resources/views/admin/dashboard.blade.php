@@ -26,11 +26,11 @@
             <div class="card-body stats-card">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="card-subtitle mb-1">Usuarios Activos</h6>
-                        <h4 class="card-title mb-0">{{ $totalUsers - 2 }}</h4>
+                        <h6 class="card-subtitle mb-1">Total Puntos</h6>
+                        <h4 class="card-title mb-0">{{ number_format($totalPoints) }}</h4>
                     </div>
                     <div class="stats-icon">
-                        <i class="bi bi-person-check"></i>
+                        <i class="bi bi-trophy"></i>
                     </div>
                 </div>
             </div>
@@ -58,11 +58,11 @@
             <div class="card-body stats-card">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="card-subtitle mb-1">Verificados</h6>
-                        <h4 class="card-title mb-0">{{ $totalUsers - 1 }}</h4>
+                        <h6 class="card-subtitle mb-1">Actividad Puntos</h6>
+                        <h4 class="card-title mb-0">{{ $recentPointsActivity->count() }}</h4>
                     </div>
                     <div class="stats-icon">
-                        <i class="bi bi-shield-check"></i>
+                        <i class="bi bi-activity"></i>
                     </div>
                 </div>
             </div>
@@ -141,19 +141,71 @@
                         <i class="bi bi-people me-2"></i>
                         Gestionar Usuarios
                     </a>
-                    <button class="btn btn-outline-success btn-sm">
-                        <i class="bi bi-plus-circle me-2"></i>
-                        Agregar Nuevo Usuario
-                    </button>
-                    <button class="btn btn-outline-info btn-sm">
-                        <i class="bi bi-gear me-2"></i>
-                        Configuración del Sistema
-                    </button>
+                    <a href="{{ route('admin.qr-scanner') }}" class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-qr-code-scan me-2"></i>
+                        Escáner QR
+                    </a>
+                    <a href="{{ route('admin.points-history') }}" class="btn btn-outline-info btn-sm">
+                        <i class="bi bi-trophy me-2"></i>
+                        Historial de Puntos
+                    </a>
                     <button class="btn btn-outline-warning btn-sm">
                         <i class="bi bi-file-earmark-text me-2"></i>
                         Ver Reportes
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Points Activity -->
+<div class="row">
+    <div class="col-md-12 mb-3">
+        <div class="card">
+            <div class="card-header bg-white card-header-compact">
+                <h6 class="card-title-compact">
+                    <i class="bi bi-trophy me-2"></i>
+                    Actividad Reciente de Puntos
+                </h6>
+            </div>
+            <div class="card-body">
+                @if($recentPointsActivity->count() > 0)
+                    <div class="timeline">
+                        @foreach($recentPointsActivity as $activity)
+                        <div class="timeline-item mb-3">
+                            <div class="d-flex">
+                                <div class="timeline-icon {{ $activity->points > 0 ? 'timeline-icon-success' : 'timeline-icon-warning' }} me-3">
+                                    <i class="bi {{ $activity->points > 0 ? 'bi-plus-circle' : 'bi-dash-circle' }}"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="mb-1 timeline-content-title">
+                                        <strong>{{ $activity->admin->full_name }}</strong> otorgó 
+                                        <span class="fw-bold text-primary">{{ $activity->points }} puntos</span> 
+                                        a <strong>{{ $activity->user->full_name }}</strong>
+                                    </p>
+                                    <small class="text-muted">{{ $activity->formatted_description }}</small>
+                                    <br>
+                                    <small class="timeline-content-date">{{ $activity->created_at->diffForHumans() }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{{ route('admin.points-history') }}" class="btn btn-sm btn-outline-primary">
+                            Ver Todo el Historial
+                        </a>
+                    </div>
+                @else
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-trophy-fill opacity-50" style="font-size: 2rem;"></i>
+                        <p class="mb-0 mt-2">No hay actividad de puntos reciente</p>
+                        <a href="{{ route('admin.qr-scanner') }}" class="btn btn-sm btn-primary mt-2">
+                            Comenzar a Otorgar Puntos
+                        </a>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
