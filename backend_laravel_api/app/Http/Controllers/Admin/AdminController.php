@@ -86,14 +86,6 @@ class AdminController extends Controller
     }
 
     /**
-     * Show QR code scanner for awarding points
-     */
-    public function showQrScanner()
-    {
-        return view('admin.qr-scanner');
-    }
-
-    /**
      * Award points to user manually
      */
     public function awardPoints(Request $request, $id)
@@ -110,42 +102,6 @@ class AdminController extends Controller
         $user->addPoints($points, auth()->id(), $description);
 
         return redirect()->back()->with('success', "Successfully awarded {$points} points to {$user->full_name}");
-    }
-
-    /**
-     * Process QR code scan and award points
-     */
-    public function processQrScan(Request $request)
-    {
-        $request->validate([
-            'qr_code_data' => 'required|string',
-            'points' => 'required|integer|min:1|max:1000',
-            'description' => 'nullable|string|max:255'
-        ]);
-
-        try {
-            $qrCodeService = new QrCodeService();
-            $qrData = $qrCodeService->decodeQrCodeData($request->qr_code_data);
-            
-            if (!$qrData || !isset($qrData['user_id'])) {
-                return redirect()->back()->with('error', 'Invalid QR code data');
-            }
-
-            $user = User::find($qrData['user_id']);
-            if (!$user) {
-                return redirect()->back()->with('error', 'User not found');
-            }
-
-            $points = $request->points;
-            $description = $request->description ?? 'Points awarded via QR code scan';
-            
-            $user->addPoints($points, auth()->id(), $description, $request->qr_code_data);
-
-            return redirect()->back()->with('success', "Successfully awarded {$points} points to {$user->full_name}");
-
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Error processing QR code: ' . $e->getMessage());
-        }
     }
 
     /**

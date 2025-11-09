@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ProductController;
 
 Route::get('/', function () {
     return response()->json([
@@ -40,9 +42,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('{id}/award-points', [AdminController::class, 'awardPoints'])->name('award-points');
         });
         
-        // QR code and points routes
-        Route::get('qr-scanner', [AdminController::class, 'showQrScanner'])->name('qr-scanner');
-        Route::post('qr-scan', [AdminController::class, 'processQrScan'])->name('qr-scan');
+        // Points management routes
         Route::get('points-history', [AdminController::class, 'pointsHistory'])->name('points-history');
+        
+        // Category management routes
+        Route::resource('categories', CategoryController::class);
+        Route::post('categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
+        
+        // Product management routes
+        Route::resource('products', ProductController::class);
+        Route::post('products/{product}/toggle-status', [ProductController::class, 'toggleStatus'])->name('products.toggle-status');
+        Route::post('products/bulk-delete', [ProductController::class, 'bulkDelete'])->name('products.bulk-delete');
     });
 });

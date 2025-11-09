@@ -98,22 +98,7 @@
                             @enderror
                         </div>
                         
-                        <div class="col-md-3 mb-3">
-                            <label for="phone_code" class="form-label form-label-styled">
-                                Código de País
-                            </label>
-                            <input type="text" 
-                                   class="form-control @error('phone_code') is-invalid @enderror" 
-                                   id="phone_code" 
-                                   name="phone_code" 
-                                   value="{{ old('phone_code', $user->phone_code) }}"
-                                   placeholder="1">
-                            @error('phone_code')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        
-                        <div class="col-md-3 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label for="phone_number" class="form-label form-label-styled">
                                 Número de Teléfono
                             </label>
@@ -122,7 +107,7 @@
                                    id="phone_number" 
                                    name="phone_number" 
                                    value="{{ old('phone_number', $user->phone_number) }}"
-                                   placeholder="5551234567">
+                                   placeholder="+1234567890">
                             @error('phone_number')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -145,21 +130,6 @@
                                    name="street_address" 
                                    value="{{ old('street_address', $user->street_address) }}">
                             @error('street_address')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label for="address_line_2" class="form-label form-label-styled">
-                                Dirección Línea 2
-                            </label>
-                            <input type="text" 
-                                   class="form-control @error('address_line_2') is-invalid @enderror" 
-                                   id="address_line_2" 
-                                   name="address_line_2" 
-                                   value="{{ old('address_line_2', $user->address_line_2) }}"
-                                   placeholder="Apartamento, suite, etc.">
-                            @error('address_line_2')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -202,20 +172,6 @@
                                    name="postal_code" 
                                    value="{{ old('postal_code', $user->postal_code) }}">
                             @error('postal_code')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label for="country" class="form-label form-label-styled">
-                                País
-                            </label>
-                            <input type="text" 
-                                   class="form-control @error('country') is-invalid @enderror" 
-                                   id="country" 
-                                   name="country" 
-                                   value="{{ old('country', $user->country) }}">
-                            @error('country')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>

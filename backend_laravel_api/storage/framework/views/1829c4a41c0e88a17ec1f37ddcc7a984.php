@@ -1,8 +1,8 @@
-@extends('layouts.admin.app')
 
-@section('title', 'Tablero')
 
-@section('content')
+<?php $__env->startSection('title', 'Tablero'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div class="row">
     <!-- Stats Cards -->
     <div class="col-md-3 mb-3">
@@ -11,7 +11,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="card-subtitle mb-1">Total de Usuarios</h6>
-                        <h4 class="card-title mb-0">{{ $totalUsers }}</h4>
+                        <h4 class="card-title mb-0"><?php echo e($totalUsers); ?></h4>
                     </div>
                     <div class="stats-icon">
                         <i class="bi bi-people"></i>
@@ -27,7 +27,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="card-subtitle mb-1">Total Puntos</h6>
-                        <h4 class="card-title mb-0">{{ number_format($totalPoints) }}</h4>
+                        <h4 class="card-title mb-0"><?php echo e(number_format($totalPoints)); ?></h4>
                     </div>
                     <div class="stats-icon">
                         <i class="bi bi-trophy"></i>
@@ -43,7 +43,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="card-subtitle mb-1">Nuevos Hoy</h6>
-                        <h4 class="card-title mb-0">{{ $totalUsers > 5 ? 3 : 1 }}</h4>
+                        <h4 class="card-title mb-0"><?php echo e($totalUsers > 5 ? 3 : 1); ?></h4>
                     </div>
                     <div class="stats-icon">
                         <i class="bi bi-person-plus"></i>
@@ -59,7 +59,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="card-subtitle mb-1">Actividad Puntos</h6>
-                        <h4 class="card-title mb-0">{{ $recentPointsActivity->count() }}</h4>
+                        <h4 class="card-title mb-0"><?php echo e($recentPointsActivity->count()); ?></h4>
                     </div>
                     <div class="stats-icon">
                         <i class="bi bi-activity"></i>
@@ -81,7 +81,7 @@
                 </h6>
             </div>
             <div class="card-body p-0">
-                @if($recentUsers->count() > 0)
+                <?php if($recentUsers->count() > 0): ?>
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
                             <thead>
@@ -93,35 +93,35 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($recentUsers as $user)
+                                <?php $__currentLoopData = $recentUsers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <tr>
                                         <td>
-                                            <div class="table-user-name">{{ $user->full_name }}</div>
+                                            <div class="table-user-name"><?php echo e($user->full_name); ?></div>
                                         </td>
-                                        <td class="table-text-muted">{{ $user->email }}</td>
-                                        <td class="table-text-muted">{{ $user->created_at->format('M d, Y') }}</td>
+                                        <td class="table-text-muted"><?php echo e($user->email); ?></td>
+                                        <td class="table-text-muted"><?php echo e($user->created_at->format('M d, Y')); ?></td>
                                         <td>
-                                            @if($user->email_verified_at)
+                                            <?php if($user->email_verified_at): ?>
                                                 <span class="badge status-badge active">
                                                     <i class="bi bi-check-circle me-1"></i>Activo
                                                 </span>
-                                            @else
+                                            <?php else: ?>
                                                 <span class="badge status-badge pending">
                                                     <i class="bi bi-exclamation-circle me-1"></i>Pendiente
                                                 </span>
-                                            @endif
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </tbody>
                         </table>
                     </div>
-                @else
+                <?php else: ?>
                     <div class="text-center py-5 empty-state-text">
                         <i class="bi bi-people empty-state-icon"></i>
                         <p class="mt-3 mb-0">No se encontraron usuarios</p>
                     </div>
-                @endif
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -137,15 +137,15 @@
             </div>
             <div class="card-body card-body-compact">
                 <div class="d-grid gap-2 action-btn-group">
-                    <a href="{{ route('admin.users.index') }}" class="btn btn-outline-primary btn-sm">
+                    <a href="<?php echo e(route('admin.users.index')); ?>" class="btn btn-outline-primary btn-sm">
                         <i class="bi bi-people me-2"></i>
                         Gestionar Usuarios
                     </a>
-                    <a href="{{ route('admin.qr-scanner') }}" class="btn btn-outline-success btn-sm">
+                    <a href="<?php echo e(route('admin.qr-scanner')); ?>" class="btn btn-outline-success btn-sm">
                         <i class="bi bi-camera me-2"></i>
                         Escáner Cámara
                     </a>
-                    <a href="{{ route('admin.points-history') }}" class="btn btn-outline-info btn-sm">
+                    <a href="<?php echo e(route('admin.points-history')); ?>" class="btn btn-outline-info btn-sm">
                         <i class="bi bi-trophy me-2"></i>
                         Historial de Puntos
                     </a>
@@ -170,43 +170,43 @@
                 </h6>
             </div>
             <div class="card-body">
-                @if($recentPointsActivity->count() > 0)
+                <?php if($recentPointsActivity->count() > 0): ?>
                     <div class="timeline">
-                        @foreach($recentPointsActivity as $activity)
+                        <?php $__currentLoopData = $recentPointsActivity; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $activity): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <div class="timeline-item mb-3">
                             <div class="d-flex">
-                                <div class="timeline-icon {{ $activity->points > 0 ? 'timeline-icon-success' : 'timeline-icon-warning' }} me-3">
-                                    <i class="bi {{ $activity->points > 0 ? 'bi-plus-circle' : 'bi-dash-circle' }}"></i>
+                                <div class="timeline-icon <?php echo e($activity->points > 0 ? 'timeline-icon-success' : 'timeline-icon-warning'); ?> me-3">
+                                    <i class="bi <?php echo e($activity->points > 0 ? 'bi-plus-circle' : 'bi-dash-circle'); ?>"></i>
                                 </div>
                                 <div class="flex-1">
                                     <p class="mb-1 timeline-content-title">
-                                        <strong>{{ $activity->admin->full_name }}</strong> otorgó 
-                                        <span class="fw-bold text-primary">{{ $activity->points }} puntos</span> 
-                                        a <strong>{{ $activity->user->full_name }}</strong>
+                                        <strong><?php echo e($activity->admin->full_name); ?></strong> otorgó 
+                                        <span class="fw-bold text-primary"><?php echo e($activity->points); ?> puntos</span> 
+                                        a <strong><?php echo e($activity->user->full_name); ?></strong>
                                     </p>
-                                    <small class="text-muted">{{ $activity->formatted_description }}</small>
+                                    <small class="text-muted"><?php echo e($activity->formatted_description); ?></small>
                                     <br>
-                                    <small class="timeline-content-date">{{ $activity->created_at->diffForHumans() }}</small>
+                                    <small class="timeline-content-date"><?php echo e($activity->created_at->diffForHumans()); ?></small>
                                 </div>
                             </div>
                         </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                     <div class="text-center mt-3">
-                        <a href="{{ route('admin.points-history') }}" class="btn btn-sm btn-outline-primary">
+                        <a href="<?php echo e(route('admin.points-history')); ?>" class="btn btn-sm btn-outline-primary">
                             Ver Todo el Historial
                         </a>
                     </div>
-                @else
+                <?php else: ?>
                     <div class="text-center text-muted py-3">
                         <i class="bi bi-trophy-fill opacity-50" style="font-size: 2rem;"></i>
                         <p class="mb-0 mt-2">No hay actividad de puntos reciente</p>
-                        <a href="{{ route('admin.qr-scanner') }}" class="btn btn-sm btn-primary mt-2">
+                        <a href="<?php echo e(route('admin.qr-scanner')); ?>" class="btn btn-sm btn-primary mt-2">
                             <i class="bi bi-camera me-2"></i>
                             Comenzar a Escanear QR
                         </a>
                     </div>
-                @endif
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -228,21 +228,21 @@
                         <div class="text-center">
                             <i class="bi bi-server system-info-server"></i>
                             <h6 class="mt-2 mb-1 system-info-title">Versión Laravel</h6>
-                            <p class="text-muted mb-0">{{ app()->version() }}</p>
+                            <p class="text-muted mb-0"><?php echo e(app()->version()); ?></p>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="text-center">
                             <i class="bi bi-code-slash system-info-php"></i>
                             <h6 class="mt-2 mb-1 system-info-title">Versión PHP</h6>
-                            <p class="text-muted mb-0">{{ PHP_VERSION }}</p>
+                            <p class="text-muted mb-0"><?php echo e(PHP_VERSION); ?></p>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="text-center">
                             <i class="bi bi-calendar system-info-time"></i>
                             <h6 class="mt-2 mb-1 system-info-title">Hora del Servidor</h6>
-                            <p class="text-muted mb-0">{{ now()->format('M d, Y H:i') }}</p>
+                            <p class="text-muted mb-0"><?php echo e(now()->format('M d, Y H:i')); ?></p>
                         </div>
                     </div>
                     <div class="col-md-3">
@@ -259,4 +259,5 @@
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.admin.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Ashraf\Desktop\pj\ByCrousty\backend_laravel_api\resources\views/admin/dashboard.blade.php ENDPATH**/ ?>

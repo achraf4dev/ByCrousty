@@ -28,8 +28,6 @@ class UserFactory extends Factory
             'city' => fake()->city(),
             'state' => fake()->state(),
             'postal_code' => fake()->postcode(),
-            'country' => fake()->country(),
-            'phone_code' => '+1',
             'phone_number' => fake()->phoneNumber(),
         ];
     }

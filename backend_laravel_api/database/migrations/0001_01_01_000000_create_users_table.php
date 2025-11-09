@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('full_name');
             $table->string('username')->unique();
             $table->string('qr_code_data')->unique()->nullable();
+            $table->integer('points')->default(0);
+            $table->string('profile_picture')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
@@ -25,9 +27,6 @@ return new class extends Migration
             $table->string('city')->nullable();
             $table->string('state')->nullable();
             $table->string('postal_code')->nullable();
-            $table->string('country')->nullable();
-            $table->string('address_line_2')->nullable();
-            $table->string('phone_code')->nullable();
             $table->string('phone_number')->nullable();
             $table->rememberToken();
             $table->timestamps();
