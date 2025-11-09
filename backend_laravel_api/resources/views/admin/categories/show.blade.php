@@ -41,8 +41,8 @@
                             <tr>
                                 <th>Estado:</th>
                                 <td>
-                                    <span class="badge {{ $category->status ? 'bg-success' : 'bg-secondary' }}">
-                                        {{ $category->status ? 'Activa' : 'Inactiva' }}
+                                    <span class="badge {{ $category->status === 'active' ? 'bg-success' : 'bg-secondary' }}">
+                                        {{ $category->status === 'active' ? 'Activa' : 'Inactiva' }}
                                     </span>
                                 </td>
                             </tr>
@@ -116,8 +116,8 @@
                                             <span class="badge bg-warning text-dark">{{ $product->points }} pts</span>
                                         </td>
                                         <td>
-                                            <span class="badge {{ $product->status ? 'bg-success' : 'bg-secondary' }}">
-                                                {{ $product->status ? 'Activo' : 'Inactivo' }}
+                                            <span class="badge {{ $product->status === 'active' ? 'bg-success' : 'bg-secondary' }}">
+                                                {{ $product->status === 'active' ? 'Activo' : 'Inactivo' }}
                                             </span>
                                         </td>
                                         <td>

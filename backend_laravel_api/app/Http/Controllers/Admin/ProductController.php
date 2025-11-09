@@ -59,27 +59,51 @@ class ProductController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'points' => 'nullable|integer|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'price' => 'nullable|numeric|min:0',
+            'points' => 'required|integer|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'category_id' => 'required|exists:categories,id',
-            'status' => 'nullable|in:active,inactive'
+            'status' => 'nullable|string'
         ]);
 
-        $data = $request->all();
+        $data = [
+            'name' => $request->name,
+            'description' => $request->description,
+            'price' => $request->price ?? 0,
+            'points' => $request->points,
+            'category_id' => $request->category_id,
+            'status' => $request->has('status') ? 'active' : 'inactive'
+        ];
 
         // Handle image upload
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('products', 'public');
+            $file = $request->file('image');
+            
+            if ($file->isValid()) {
+                try {
+                    $data['image'] = $file->store('products', 'public');
+                } catch (\Exception $e) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->with('error', 'Error uploading image: ' . $e->getMessage());
+                }
+            } else {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Invalid image file uploaded.');
+            }
         }
 
-        $data['status'] = $data['status'] ?? 'active';
-        $data['points'] = $data['points'] ?? 0;
-
-        Product::create($data);
-
-        return redirect()->route('admin.products.index')
-            ->with('success', 'Product created successfully.');
+        try {
+            Product::create($data);
+            
+            return redirect()->route('admin.products.index')
+                ->with('success', 'Product created successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error creating product: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -116,14 +140,21 @@ class ProductController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'points' => 'nullable|integer|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'price' => 'nullable|numeric|min:0',
+            'points' => 'required|integer|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'category_id' => 'required|exists:categories,id',
-            'status' => 'nullable|in:active,inactive'
+            'status' => 'nullable|string'
         ]);
 
-        $data = $request->all();
+        $data = [
+            'name' => $request->name,
+            'description' => $request->description,
+            'price' => $request->price ?? 0,
+            'points' => $request->points,
+            'category_id' => $request->category_id,
+            'status' => $request->has('status') ? 'active' : 'inactive'
+        ];
 
         // Handle image upload
         if ($request->hasFile('image')) {
@@ -134,13 +165,16 @@ class ProductController extends Controller
             $data['image'] = $request->file('image')->store('products', 'public');
         }
 
-        $data['status'] = $data['status'] ?? 'active';
-        $data['points'] = $data['points'] ?? 0;
-
-        $product->update($data);
-
-        return redirect()->route('admin.products.index')
-            ->with('success', 'Product updated successfully.');
+        try {
+            $product->update($data);
+            
+            return redirect()->route('admin.products.index')
+                ->with('success', 'Product updated successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error updating product: ' . $e->getMessage());
+        }
     }
 
     /**

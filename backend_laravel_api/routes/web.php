@@ -19,9 +19,16 @@ Route::get('/login', function () {
 
 // Admin routes
 Route::prefix('admin')->name('admin.')->group(function () {
-    // Guest routes (not authenticated)
+    // Handle root admin path based on authentication
+    Route::get('/', function () {
+        if (auth()->check() && auth()->user()->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+        return app(AdminAuthController::class)->showLogin();
+    })->name('login.form');
+    
+    // Login route for guests only
     Route::middleware('guest')->group(function () {
-        Route::get('/', [AdminAuthController::class, 'showLogin'])->name('login.form');
         Route::post('/', [AdminAuthController::class, 'login'])->name('login');
     });
 

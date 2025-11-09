@@ -13,6 +13,16 @@
                 </h5>
             </div>
             <div class="card-body">
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+                
                 <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     
@@ -61,14 +71,14 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="price" class="form-label">Precio (USD)</label>
+                                <label for="price" class="form-label">Precio (EUR)</label>
                                 <div class="input-group">
                                     <span class="input-group-text">€</span>
                                     <input type="number" class="form-control @error('price') is-invalid @enderror" 
-                                           id="price" name="price" value="{{ old('price') }}" 
+                                           id="price" name="price" value="{{ old('price', 0) }}" 
                                            step="0.01" min="0" placeholder="0.00">
                                 </div>
-                                <div class="form-text">Deja en blanco si es gratis</div>
+                                <div class="form-text">Precio del producto (deja 0 si es gratis)</div>
                                 @error('price')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -92,8 +102,8 @@
                     <div class="mb-3">
                         <label for="image" class="form-label">Imagen del Producto</label>
                         <input type="file" class="form-control @error('image') is-invalid @enderror" 
-                               id="image" name="image" accept="image/*">
-                        <div class="form-text">Formatos permitidos: JPG, PNG, WebP. Tamaño máximo: 2MB</div>
+                               id="image" name="image" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp">
+                        <div class="form-text">Formatos permitidos: JPG, PNG, GIF, WebP. Tamaño máximo: 2MB</div>
                         @error('image')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -106,7 +116,7 @@
                     
                     <div class="mb-3">
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="status" name="status" value="1" 
+                            <input class="form-check-input" type="checkbox" id="status" name="status" value="active" 
                                    {{ old('status', true) ? 'checked' : '' }}>
                             <label class="form-check-label" for="status">
                                 Producto Activo

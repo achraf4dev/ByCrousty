@@ -38,22 +38,40 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255|unique:categories,name',
             'description' => 'nullable|string',
             'slug' => 'nullable|string|unique:categories,slug',
-            'status' => 'nullable|in:active,inactive'
+            'status' => 'nullable|string'
         ]);
 
-        $data = $request->all();
+        $data = [
+            'name' => $request->name,
+            'description' => $request->description,
+            'status' => $request->has('status') ? 'active' : 'inactive'
+        ];
 
         // Generate slug if not provided
-        if (empty($data['slug'])) {
-            $data['slug'] = Str::slug($data['name']);
+        if ($request->filled('slug')) {
+            $data['slug'] = Str::slug($request->slug);
+        } else {
+            $data['slug'] = Str::slug($request->name);
         }
 
-        $data['status'] = $data['status'] ?? 'active';
+        // Ensure slug is unique
+        $originalSlug = $data['slug'];
+        $counter = 1;
+        while (Category::where('slug', $data['slug'])->exists()) {
+            $data['slug'] = $originalSlug . '-' . $counter;
+            $counter++;
+        }
 
-        Category::create($data);
-
-        return redirect()->route('admin.categories.index')
-            ->with('success', 'Category created successfully.');
+        try {
+            Category::create($data);
+            
+            return redirect()->route('admin.categories.index')
+                ->with('success', 'Category created successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error creating category: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -85,22 +103,42 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
             'description' => 'nullable|string',
             'slug' => 'nullable|string|unique:categories,slug,' . $category->id,
-            'status' => 'nullable|in:active,inactive'
+            'status' => 'nullable|string'
         ]);
 
-        $data = $request->all();
+        $data = [
+            'name' => $request->name,
+            'description' => $request->description,
+            'status' => $request->has('status') ? 'active' : 'inactive'
+        ];
 
         // Generate slug if name changed and no slug provided
-        if ($request->name !== $category->name && empty($data['slug'])) {
-            $data['slug'] = Str::slug($data['name']);
+        if ($request->name !== $category->name) {
+            if ($request->filled('slug')) {
+                $data['slug'] = Str::slug($request->slug);
+            } else {
+                $data['slug'] = Str::slug($request->name);
+            }
+            
+            // Ensure slug is unique (but allow current category's slug)
+            $originalSlug = $data['slug'];
+            $counter = 1;
+            while (Category::where('slug', $data['slug'])->where('id', '!=', $category->id)->exists()) {
+                $data['slug'] = $originalSlug . '-' . $counter;
+                $counter++;
+            }
         }
 
-        $data['status'] = $data['status'] ?? 'active';
-
-        $category->update($data);
-
-        return redirect()->route('admin.categories.index')
-            ->with('success', 'Category updated successfully.');
+        try {
+            $category->update($data);
+            
+            return redirect()->route('admin.categories.index')
+                ->with('success', 'Category updated successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error updating category: ' . $e->getMessage());
+        }
     }
 
     /**

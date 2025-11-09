@@ -92,10 +92,6 @@
                         <i class="bi bi-trophy-fill text-muted" style="font-size: 4rem; opacity: 0.3;"></i>
                         <h5 class="text-muted mt-3">No hay historial de puntos</h5>
                         <p class="text-muted">Aún no se han otorgado puntos a ningún usuario.</p>
-                        <a href="{{ route('admin.qr-scanner') }}" class="btn btn-primary">
-                            <i class="bi bi-qr-code-scan me-2"></i>
-                            Comenzar a Otorgar Puntos
-                        </a>
                     </div>
                 @endif
             </div>

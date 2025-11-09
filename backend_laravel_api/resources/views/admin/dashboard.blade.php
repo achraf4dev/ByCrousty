@@ -141,10 +141,6 @@
                         <i class="bi bi-people me-2"></i>
                         Gestionar Usuarios
                     </a>
-                    <a href="{{ route('admin.qr-scanner') }}" class="btn btn-outline-success btn-sm">
-                        <i class="bi bi-camera me-2"></i>
-                        Escáner Cámara
-                    </a>
                     <a href="{{ route('admin.points-history') }}" class="btn btn-outline-info btn-sm">
                         <i class="bi bi-trophy me-2"></i>
                         Historial de Puntos
@@ -201,10 +197,6 @@
                     <div class="text-center text-muted py-3">
                         <i class="bi bi-trophy-fill opacity-50" style="font-size: 2rem;"></i>
                         <p class="mb-0 mt-2">No hay actividad de puntos reciente</p>
-                        <a href="{{ route('admin.qr-scanner') }}" class="btn btn-sm btn-primary mt-2">
-                            <i class="bi bi-camera me-2"></i>
-                            Comenzar a Escanear QR
-                        </a>
                     </div>
                 @endif
             </div>

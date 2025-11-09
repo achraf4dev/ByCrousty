@@ -13,6 +13,16 @@
                 </h5>
             </div>
             <div class="card-body">
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+                
                 <form action="{{ route('admin.categories.store') }}" method="POST">
                     @csrf
                     
@@ -32,7 +42,7 @@
                             <div class="mb-3">
                                 <label for="slug" class="form-label">Slug</label>
                                 <input type="text" class="form-control @error('slug') is-invalid @enderror" 
-                                       id="slug" name="slug" value="{{ old('slug') }}" readonly>
+                                       id="slug" name="slug" value="{{ old('slug') }}">
                                 <div class="form-text">Se genera automáticamente desde el nombre</div>
                                 @error('slug')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -53,7 +63,7 @@
                     
                     <div class="mb-3">
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="status" name="status" value="1" 
+                            <input class="form-check-input" type="checkbox" id="status" name="status" value="active" 
                                    {{ old('status', true) ? 'checked' : '' }}>
                             <label class="form-check-label" for="status">
                                 Categoría Activa

@@ -126,8 +126,8 @@
                     
                     <div class="mb-3">
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="status" name="status" value="1" 
-                                   {{ old('status', $product->status) ? 'checked' : '' }}>
+                            <input class="form-check-input" type="checkbox" id="status" name="status" value="active" 
+                                   {{ old('status', $product->status) === 'active' ? 'checked' : '' }}>
                             <label class="form-check-label" for="status">
                                 Producto Activo
                             </label>

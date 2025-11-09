@@ -20,22 +20,22 @@ Route::prefix('v1')->group(function () {
     Route::post('reset', [AuthController::class, 'reset']);
     Route::get('verify/{id}/{hash}', [AuthController::class, 'verify'])->name('verification.verify');
 
+    // Public endpoints (no authentication required)
+    Route::get('categories', [CategoryController::class, 'index']);
+    Route::get('categories/active', [CategoryController::class, 'active']);
+    Route::get('categories/{id}', [CategoryController::class, 'show']);
+    
+    Route::get('products', [ProductController::class, 'index']);
+    Route::get('products/active', [ProductController::class, 'active']);
+    Route::get('products/{id}', [ProductController::class, 'show']);
+    Route::get('categories/{id}/products', [ProductController::class, 'byCategory']);
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout', [AuthController::class, 'logout']);
         Route::get('profile', [AuthController::class, 'getUserProfile']);
         
         // QR code endpoints (requires authentication)
         Route::get('users/my-qr-code', [AuthController::class, 'getMyQrCode']);
-        
-        // Category and Product endpoints (public for authenticated users)
-        Route::get('categories', [CategoryController::class, 'index']);
-        Route::get('categories/active', [CategoryController::class, 'active']);
-        Route::get('categories/{id}', [CategoryController::class, 'show']);
-        
-        Route::get('products', [ProductController::class, 'index']);
-        Route::get('products/active', [ProductController::class, 'active']);
-        Route::get('products/{id}', [ProductController::class, 'show']);
-        Route::get('categories/{id}/products', [ProductController::class, 'byCategory']);
         
         // Points endpoints
         Route::get('points', [PointsController::class, 'getUserPoints']); // Get own points
