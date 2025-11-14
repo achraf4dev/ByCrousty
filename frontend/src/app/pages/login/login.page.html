@@ -1,0 +1,31 @@
+<ion-content [fullscreen]="true">
+  <div class="center">
+    <ion-card class="login-card">
+      <img src="assets/logo.webp" alt="ByCrousty Logo" class="logo" />
+
+      <ion-card-header>
+        <ion-card-title>ByCrousty Empleado</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form #f="ngForm" (ngSubmit)="login()">
+          <ion-item fill="solid" class="field">
+            <ion-input label="Correo" labelPlacement="floating" type="email" name="email" [(ngModel)]="email" required
+              autocomplete="username">
+            </ion-input>
+          </ion-item>
+
+          <ion-item fill="solid" class="field">
+            <ion-input label="Contraseña" labelPlacement="floating" type="password" name="password"
+              [(ngModel)]="password" required autocomplete="current-password">
+            </ion-input>
+          </ion-item>
+
+          <ion-button expand="block" type="submit" class="login-btn">
+            Iniciar sesión
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
