@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\v1\LogController;
 use App\Http\Controllers\Api\v1\PointsController;
 use App\Http\Controllers\Api\v1\CategoryController;
 use App\Http\Controllers\Api\v1\ProductController;
+use App\Http\Controllers\Api\v1\AdminController;
 
 Route::get('/v1/user', function (Request $request) {
     return $request->user();
@@ -47,6 +48,15 @@ Route::prefix('v1')->group(function () {
             Route::post('points/award-by-qr', [PointsController::class, 'awardPointsByQrCode']); // Award points by QR scan
             Route::post('users/{id}/points', [PointsController::class, 'awardPointsToUser']); // Award points to specific user
             Route::get('admin/users-points', [PointsController::class, 'getAllUsersPoints']); // Get all users points
+            
+            // Admin new endpoints
+            Route::get('admin/user-by-qr/{code}', [AdminController::class, 'getUserByQr']); // Get user by QR code
+            Route::post('admin/add-points', [AdminController::class, 'addPoints']); // Add points to user
+            Route::get('admin/orders', [AdminController::class, 'getOrders']); // Get all orders
+            Route::post('admin/orders/{id}/status', [AdminController::class, 'updateOrderStatus']); // Update order status
+            Route::get('admin/summary', [AdminController::class, 'getSummary']); // Get admin dashboard summary
+            Route::get('admin/history/points', [AdminController::class, 'getPointsHistory']); // Points history with search
+            Route::get('admin/history/orders', [AdminController::class, 'getOrdersHistory']); // Orders history with search
             
             // Category management
             Route::post('categories', [CategoryController::class, 'store']);

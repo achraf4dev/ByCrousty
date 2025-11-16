@@ -121,6 +121,36 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the admin actions performed by this admin.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function adminActions()
+    {
+        return $this->hasMany(AdminAction::class, 'admin_id');
+    }
+
+    /**
+     * Get the admin actions received by this user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function receivedAdminActions()
+    {
+        return $this->hasMany(AdminAction::class, 'user_id');
+    }
+
+    /**
+     * Get the orders placed by this user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
      * Add points to user and log the transaction.
      *
      * @param int $points

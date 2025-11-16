@@ -40,16 +40,15 @@ class QrCodeService
     /**
      * Generate QR code image from data.
      *
-     * @param string $data
+     * @param string $data (base64 encoded)
      * @return string (PNG image content)
      */
     public function generateQrCodeImage($data)
     {
-        // Decode the base64 data
-        $decodedData = base64_decode($data);
-        
+        // Use the base64 data directly (don't decode it)
+        // The scanner will read the base64 string, which the API expects
         $qrCode = new QrCode(
-            data: $decodedData,
+            data: $data,
             encoding: new Encoding('UTF-8'),
             errorCorrectionLevel: ErrorCorrectionLevel::Low,
             size: 300,
