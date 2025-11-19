@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\v1\PointsController;
 use App\Http\Controllers\Api\v1\CategoryController;
 use App\Http\Controllers\Api\v1\ProductController;
 use App\Http\Controllers\Api\v1\AdminController;
+use App\Http\Controllers\Api\v1\CartController;
+use App\Http\Controllers\Api\v1\StaticContentController;
 
 Route::get('/v1/user', function (Request $request) {
     return $request->user();
@@ -20,6 +22,13 @@ Route::prefix('v1')->group(function () {
     Route::post('forgot', [AuthController::class, 'forgot']);
     Route::post('reset', [AuthController::class, 'reset']);
     Route::get('verify/{id}/{hash}', [AuthController::class, 'verify'])->name('verification.verify');
+
+    // ==================== CLIENT ROUTES ====================
+    
+    // Client Static Content (Public)
+    Route::get('static/about', [StaticContentController::class, 'about']);
+    Route::get('static/contact', [StaticContentController::class, 'contact']);
+    Route::get('static/find-us', [StaticContentController::class, 'findUs']);
 
     // Public endpoints (no authentication required)
     Route::get('categories', [CategoryController::class, 'index']);
@@ -34,6 +43,13 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout', [AuthController::class, 'logout']);
         Route::get('profile', [AuthController::class, 'getUserProfile']);
+        
+        // ==================== CART ROUTES ====================
+        Route::get('cart', [CartController::class, 'index']);
+        Route::post('cart/add', [CartController::class, 'add']);
+        Route::delete('cart/remove/{id}', [CartController::class, 'remove']);
+        Route::post('cart/clear', [CartController::class, 'clear']);
+        Route::post('cart/sync', [CartController::class, 'sync']);
         
         // QR code endpoints (requires authentication)
         Route::get('users/my-qr-code', [AuthController::class, 'getMyQrCode']);

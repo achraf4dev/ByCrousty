@@ -19,7 +19,8 @@ class AdminMiddleware
             return redirect()->route('admin.login.form');
         }
 
-        if (!auth()->user()->is_admin) {
+        $user = auth()->user();
+        if (!$user->is_admin && $user->role !== 'admin') {
             abort(403, 'Access denied. Admin privileges required.');
         }
 

@@ -29,6 +29,13 @@ class Product extends Model
     ];
 
     /**
+     * Attributes to append to model's array/JSON form
+     */
+    protected $appends = [
+        'image_url'
+    ];
+
+    /**
      * Get the category that owns the product
      */
     public function category()

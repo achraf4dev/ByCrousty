@@ -12,6 +12,10 @@ return [
     // so prefer explicit origins instead of a wildcard.
     'allowed_origins' => [
         'https://bycrousty.achraf.es', // production frontend origin
+        'http://localhost:5173',       // local Vue dev server
+        'http://localhost:3000',       // alternative local port
+        'http://127.0.0.1:5173',       // localhost alternative
+        'http://89.128.172.67:5173' // local dev via IP (if needed)
     ],
 
     'allowed_origins_patterns' => [],

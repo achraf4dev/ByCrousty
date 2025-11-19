@@ -15,6 +15,9 @@
                value="{{ old('email') }}" 
                required 
                autofocus>
+        @error('email')
+            <div class="text-danger small mt-1">{{ $message }}</div>
+        @enderror
     </div>
     
     <div class="login-input-group">
@@ -24,6 +27,9 @@
                name="password" 
                placeholder="Contraseña" 
                required>
+        @error('password')
+            <div class="text-danger small mt-1">{{ $message }}</div>
+        @enderror
     </div>
     
     <div class="d-flex justify-content-between align-items-center mb-4">
