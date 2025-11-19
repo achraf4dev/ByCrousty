@@ -38,26 +38,16 @@ const formatDate = (dateString) => {
 const loadLoginHistory = async () => {
   loading.value = true;
   try {
-    console.log('Loading login history...');
-    console.log('Auth user:', auth.user.value);
-    
     // Load user if not available
     if (!auth.user.value) {
-      console.log('User not loaded, loading user...');
       await auth.loadUser();
     }
     
     const userId = auth.user.value?.id;
-    console.log('User ID:', userId);
     
     if (userId) {
-      console.log('Fetching login logs for user:', userId);
       const response = await api.getLoginLogs(userId);
-      console.log('Response:', response);
       loginHistory.value = response.logs || [];
-      console.log('Login history loaded:', loginHistory.value);
-    } else {
-      console.error('No user ID available');
     }
   } catch (error) {
     console.error('Error loading login history:', error);
