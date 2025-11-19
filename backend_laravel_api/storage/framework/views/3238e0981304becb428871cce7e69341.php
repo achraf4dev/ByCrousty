@@ -1,7 +1,7 @@
 <?php $__env->startSection('title', 'Iniciar Sesión Admin'); ?>
 
 <?php $__env->startSection('content'); ?>
-<form method="POST" action="<?php echo e(route('admin.login')); ?>" id="loginForm">
+<form method="POST" action="<?php echo e(route('admin.login')); ?>">
     <?php echo csrf_field(); ?>
     
     <div class="login-input-group">
@@ -67,20 +67,10 @@ unset($__errorArgs, $__bag); ?>
         </div>
     </div>
     
-    <button type="submit" class="btn btn-primary login-btn" id="submitBtn">
+    <button type="submit" class="btn btn-primary login-btn">
         <i class="bi bi-box-arrow-in-right me-2"></i>
         Iniciar Sesión
     </button>
 </form>
 <?php $__env->stopSection(); ?>
-
-<?php $__env->startPush('scripts'); ?>
-<script>
-document.getElementById('loginForm').addEventListener('submit', function(e) {
-    const submitBtn = document.getElementById('submitBtn');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Iniciando...';
-});
-</script>
-<?php $__env->stopPush(); ?>
 <?php echo $__env->make('layouts.admin.guest', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/achraf.es/ByCrousty/backend_laravel_api/resources/views/admin/auth/login.blade.php ENDPATH**/ ?>

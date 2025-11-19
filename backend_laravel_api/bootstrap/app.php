@@ -14,11 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Enable Sanctum's frontend state middleware for API requests
-        // and enable the API throttle limiter. This mirrors adding
-        // EnsureFrontendRequestsAreStateful and 'throttle:api' to the
-        // `api` middleware group.
-        $middleware->statefulApi()->throttleApi();
+        // Enable API throttle limiter only.
+        // Note: statefulApi() is NOT used because this API uses token-based auth,
+        // not cookie-based sessions. statefulApi() enables CSRF protection
+        // which causes 419 errors for token-based authentication.
+        $middleware->throttleApi();
         
         // Trust all proxies for proper HTTPS detection behind nginx
         $middleware->trustProxies(at: '*', headers: \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR |

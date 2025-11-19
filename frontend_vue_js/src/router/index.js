@@ -7,6 +7,9 @@ import HomePage from '../pages/HomePage.vue';
 import ScanPage from '../pages/ScanPage.vue';
 import NotificationsPage from '../pages/NotificationsPage.vue';
 import SettingsPage from '../pages/SettingsPage.vue';
+import LoginHistoryPage from '../pages/LoginHistoryPage.vue';
+import PointsHistoryPage from '../pages/PointsHistoryPage.vue';
+import OrdersHistoryPage from '../pages/OrdersHistoryPage.vue';
 
 // Define Routes
 const routes = [
@@ -42,6 +45,24 @@ const routes = [
     path: '/settings',
     name: 'Settings',
     component: SettingsPage,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/settings/login-history',
+    name: 'LoginHistory',
+    component: LoginHistoryPage,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/settings/points-history',
+    name: 'PointsHistory',
+    component: PointsHistoryPage,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/settings/orders-history',
+    name: 'OrdersHistory',
+    component: OrdersHistoryPage,
     meta: { requiresAuth: true },
   },
   {

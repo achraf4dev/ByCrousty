@@ -1,9 +1,9 @@
 import { ref } from 'vue';
 import * as api from '../services/api';
 
-// Auth State
+// Auth State - Load from localStorage on init
 const token = ref(localStorage.getItem('token') || null);
-const user = ref(null);
+const user = ref(JSON.parse(localStorage.getItem('user') || 'null'));
 
 // Check if user is authenticated
 export const isAuthenticated = () => {
@@ -33,6 +33,11 @@ export const getUser = () => {
 // Set User
 export const setUser = (userData) => {
   user.value = userData;
+  if (userData) {
+    localStorage.setItem('user', JSON.stringify(userData));
+  } else {
+    localStorage.removeItem('user');
+  }
 };
 
 // Login
@@ -59,7 +64,8 @@ export const loadUser = async () => {
 
   try {
     const data = await api.getUser();
-    setUser(data.user);
+    // The API returns the user directly, not wrapped in {user: ...}
+    setUser(data);
     
     return { success: true, data };
   } catch (error) {
@@ -74,6 +80,7 @@ export const logout = () => {
   setToken(null);
   setUser(null);
   localStorage.removeItem('token');
+  localStorage.removeItem('user');
 };
 
 // Export auth store as composable

@@ -254,6 +254,13 @@ export const getHistoryOrders = async (search = '') => {
   });
 };
 
+// Get login logs for a user
+export const getLoginLogs = async (userId) => {
+  return await apiRequest(`/users/${userId}/login-logs`, {
+    method: 'GET',
+  });
+};
+
 // Export API service
 export default {
   login,
@@ -280,4 +287,5 @@ export default {
   getSummary,
   getHistoryPoints,
   getHistoryOrders,
+  getLoginLogs,
 };
