@@ -14,10 +14,13 @@ const router = useRouter();
 // State
 const categories = ref([]);
 const products = ref([]);
+const promotionalProducts = ref([]);
 const loading = ref(true);
 const productsLoading = ref(true);
+const promotionalLoading = ref(true);
 const error = ref(null);
 const productsError = ref(null);
+const promotionalError = ref(null);
 
 // Featured products/stats
 const stats = ref([
@@ -26,57 +29,7 @@ const stats = ref([
   { icon: 'bi-shop', value: '100+', label: 'Productos Frescos' }
 ]);
 
-// Professional hero slider
-const currentSlide = ref(0);
-const heroSlides = ref([
-  {
-    id: 1,
-    title: 'Sabores Auténticos',
-    subtitle: 'Descubre la excelencia culinaria',
-    description: 'Experiencia única con ingredientes frescos y de la más alta calidad',
-    image: 'https://placehold.co/1920x700/1a1a1a/FFD700?text=Premium+Quality',
-    highlight: 'Productos Premium'
-  },
-  {
-    id: 2,
-    title: 'Tradición y Pasión',
-    subtitle: 'Cada producto cuenta una historia',
-    description: 'Elaborados con dedicación siguiendo recetas tradicionales',
-    image: 'https://placehold.co/1920x700/242424/FFD700?text=Fresh+Daily',
-    highlight: 'Frescos Diarios'
-  },
-  {
-    id: 3,
-    title: 'Calidad Garantizada',
-    subtitle: 'Compromiso con la excelencia',
-    description: 'Los mejores ingredientes seleccionados para tu satisfacción',
-    image: 'https://placehold.co/1920x700/0f0f0f/FFD700?text=Top+Selection',
-    highlight: 'Mejor Selección'
-  }
-]);
-
-// Auto-play slider
-let sliderInterval = null;
-
-const nextSlide = () => {
-  currentSlide.value = (currentSlide.value + 1) % heroSlides.value.length;
-};
-
-const goToSlide = (index) => {
-  currentSlide.value = index;
-  stopAutoPlay();
-  startAutoPlay();
-};
-
-const startAutoPlay = () => {
-  sliderInterval = setInterval(nextSlide, 4000); // Change every 4 seconds
-};
-
-const stopAutoPlay = () => {
-  if (sliderInterval) {
-    clearInterval(sliderInterval);
-  }
-};
+// ...existing code...
 
 // Features
 const features = ref([
@@ -102,13 +55,13 @@ const features = ref([
   }
 ]);
 
-// Load categories
+
+// Load most sold categories (limit 4)
 const loadCategories = async () => {
   loading.value = true;
   error.value = null;
-  
   try {
-    const response = await api.getCategories();
+    const response = await api.getMostSoldCategories();
     categories.value = response.data.data || [];
   } catch (err) {
     console.error('Error loading categories:', err);
@@ -118,19 +71,34 @@ const loadCategories = async () => {
   }
 };
 
-// Load products
+// Load most sold products (limit 8)
 const loadProducts = async () => {
   productsLoading.value = true;
   productsError.value = null;
-  
   try {
-    const response = await api.getProducts({ per_page: 6 });
-    products.value = response.data.data?.data || response.data.data || [];
+    const response = await api.getMostSoldProducts();
+    products.value = response.data.data || [];
   } catch (err) {
     console.error('Error loading products:', err);
     productsError.value = 'Error al cargar los productos. Por favor, intenta de nuevo.';
   } finally {
     productsLoading.value = false;
+  }
+};
+
+// Load promotional products (with points > 0)
+const loadPromotionalProducts = async () => {
+  promotionalLoading.value = true;
+  promotionalError.value = null;
+  
+  try {
+    const response = await api.getProductsWithPoints({ per_page: 5 });
+    promotionalProducts.value = response.data.data?.data || response.data.data || [];
+  } catch (err) {
+    console.error('Error loading promotional products:', err);
+    promotionalError.value = 'Error al cargar las promociones. Por favor, intenta de nuevo.';
+  } finally {
+    promotionalLoading.value = false;
   }
 };
 
@@ -144,103 +112,83 @@ const exploreMenu = () => {
   router.push('/products');
 };
 
+// Navigate to offers
+const viewAllOffers = () => {
+  router.push('/products'); // You can change this to a specific offers page if available
+};
+
 // Initialize
 onMounted(() => {
   loadCategories();
   loadProducts();
-  startAutoPlay();
+  loadPromotionalProducts();
 });
 </script>
 
 <template>
   <div class="home-page">
-    <!-- Professional Hero Slider -->
-    <section class="hero-slider" @mouseenter="stopAutoPlay" @mouseleave="startAutoPlay">
-      <div class="slider-container">
-        <!-- Slides -->
-        <TransitionGroup name="slide-fade">
-          <div 
-            v-for="(slide, index) in heroSlides" 
-            v-show="currentSlide === index"
-            :key="slide.id"
-            class="hero-slide"
-            :style="{ backgroundImage: `url(${slide.image})` }"
-          >
-            <div class="hero-overlay"></div>
-            <div class="hero-content">
-              <div class="content-wrapper">
-                <span class="hero-highlight">{{ slide.highlight }}</span>
-                <h1 class="hero-title">{{ slide.title }}</h1>
-                <p class="hero-subtitle">{{ slide.subtitle }}</p>
-                <p class="hero-description">{{ slide.description }}</p>
-                <div class="hero-actions">
-                  <button class="btn btn-warning btn-lg px-5 py-3" @click="exploreMenu">
-                    <i class="bi bi-compass me-2"></i>Explorar Menú
-                  </button>
-                  <button class="btn btn-outline-light btn-lg px-5 py-3" @click="viewAllCategories">
-                    <i class="bi bi-grid-3x3-gap me-2"></i>Categorías
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </TransitionGroup>
-
-        <!-- Indicators -->
-        <div class="slider-indicators">
-          <button
-            v-for="(slide, index) in heroSlides"
-            :key="`indicator-${slide.id}`"
-            :class="['indicator', { active: currentSlide === index }]"
-            @click="goToSlide(index)"
-            :aria-label="`Go to slide ${index + 1}`"
-          >
-            <span class="indicator-progress" v-if="currentSlide === index"></span>
-          </button>
+  <!-- Products Section (hero/slider removed) -->
+  <section class="products-section bg-light-section">
+      <div class="section-header text-center mb-2">
+        <div>
+          <h2 class="section-title">Descubre Nuestros Productos</h2>
+          <p class="section-subtitle">Explora nuestra selección de productos frescos y de calidad</p>
         </div>
       </div>
-    </section>
 
-    <!-- Stats Section -->
-    <section class="stats-section">
-      <div class="stats-container">
-        <div 
-          v-for="stat in stats" 
-          :key="stat.label"
-          class="stat-item"
-        >
-          <div class="stat-icon">
-            <i :class="stat.icon"></i>
-          </div>
-          <h3 class="stat-value">{{ stat.value }}</h3>
-          <p class="stat-label">{{ stat.label }}</p>
+      <!-- Loading State -->
+      <div v-if="productsLoading" class="loading-state">
+        <div class="spinner-border text-warning" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-3 text-secondary">Cargando productos...</p>
+      </div>
+
+      <!-- Error State -->
+      <div v-else-if="productsError" class="error-state">
+        <i class="bi bi-exclamation-circle text-danger"></i>
+        <p class="mt-3 text-secondary">{{ productsError }}</p>
+        <button class="btn btn-warning mt-3" @click="loadProducts">
+          <i class="bi bi-arrow-clockwise me-2"></i>Reintentar
+        </button>
+      </div>
+
+      <!-- Products Grid -->
+      <div v-else-if="products.length > 0">
+        <div class="featured-product-full-width mb-2">
+          <ProductCard
+            :product="products[0]"
+            :hideAddToCart="true"
+            fullWidth
+            :imageHeight="300"
+          />
+        </div>
+        <div v-if="products.length > 1" class="products-grid">
+          <ProductCard
+            v-for="product in products.slice(1)"
+            :key="product.id"
+            :product="product"
+            :hideAddToCart="true"
+          />
         </div>
       </div>
-    </section>
 
-    <!-- Features Section -->
-    <section class="features-section">
-      <div class="section-header text-center mb-5">
-        <h2 class="section-title">¿Por Qué Elegirnos?</h2>
-        <p class="section-subtitle">Compromiso con la excelencia en cada detalle</p>
+      <!-- Empty State -->
+      <div v-else class="empty-state">
+        <i class="bi bi-inbox text-secondary"></i>
+        <p class="mt-3 text-secondary">No hay productos disponibles</p>
       </div>
-      <div class="features-grid">
-        <div 
-          v-for="feature in features" 
-          :key="feature.title"
-          class="feature-card"
-        >
-          <div class="feature-icon">
-            <i :class="feature.icon"></i>
-          </div>
-          <h3 class="feature-title">{{ feature.title }}</h3>
-          <p class="feature-description">{{ feature.description }}</p>
-        </div>
+
+      <!-- View All Button -->
+      <div v-if="products.length > 0" class="view-all-products-wrapper mt-5">
+        <button class="btn btn-view-all" @click="exploreMenu">
+          Ver Todos los Productos <i class="bi bi-arrow-right ms-2"></i>
+        </button>
       </div>
     </section>
 
     <!-- Categories Section -->
-    <section class="categories-section">
+  <section class="categories-section bg-dark-section">
       <div class="section-header text-center mb-5">
         <div>
           <h2 class="section-title">Nuestras Categorías</h2>
@@ -268,7 +216,7 @@ onMounted(() => {
       <!-- Categories Grid -->
       <div v-else-if="categories.length > 0" class="categories-grid">
         <CategoryCard 
-          v-for="category in categories.slice(0, 6)" 
+          v-for="category in categories" 
           :key="category.id"
           :category="category"
         />
@@ -288,65 +236,130 @@ onMounted(() => {
       </div>
     </section>
 
-    <!-- Products Section -->
-    <section class="products-section">
+    <!-- Promotions Section -->
+  <section class="promotions-section bg-light-section">
       <div class="section-header text-center mb-5">
         <div>
-          <h2 class="section-title">Nuestros Productos</h2>
-          <p class="section-subtitle">Descubre nuestra selección de productos frescos y de calidad</p>
+          <h2 class="section-title">Productos con Puntos</h2>
+          <p class="section-subtitle">Canjea tus puntos por estos productos especiales</p>
         </div>
       </div>
 
       <!-- Loading State -->
-      <div v-if="productsLoading" class="loading-state">
+      <div v-if="promotionalLoading" class="loading-state">
         <div class="spinner-border text-warning" role="status">
           <span class="visually-hidden">Cargando...</span>
         </div>
-        <p class="mt-3 text-secondary">Cargando productos...</p>
+        <p class="mt-3 text-secondary">Cargando promociones...</p>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="productsError" class="error-state">
+      <div v-else-if="promotionalError" class="error-state">
         <i class="bi bi-exclamation-circle text-danger"></i>
-        <p class="mt-3 text-secondary">{{ productsError }}</p>
-        <button class="btn btn-warning mt-3" @click="loadProducts">
+        <p class="mt-3 text-secondary">{{ promotionalError }}</p>
+        <button class="btn btn-warning mt-3" @click="loadPromotionalProducts">
           <i class="bi bi-arrow-clockwise me-2"></i>Reintentar
         </button>
       </div>
 
-      <!-- Products Grid -->
-      <div v-else-if="products.length > 0" class="products-grid">
-        <ProductCard 
-          v-for="product in products.slice(0, 6)" 
+      <!-- Promotional Products List -->
+      <div v-else-if="promotionalProducts.length > 0" class="promotions-list">
+        <div 
+          v-for="product in promotionalProducts" 
           :key="product.id"
-          :product="product"
-        />
+          class="promotion-item"
+          @click="router.push(`/products/${product.id}`)"
+        >
+          <div class="promo-image">
+            <img :src="product.image_url || product.image || 'https://placehold.co/200x120/1a1a1a/FFD700?text=Product'" :alt="product.name" />
+          </div>
+          <div class="promo-content">
+            <p class="promo-text">{{ product.name }}</p>
+            <p v-if="product.description" class="promo-description">
+              {{ product.description.substring(0, 100) }}{{ product.description.length > 100 ? '...' : '' }}
+            </p>
+          </div>
+          <div class="promo-points">
+            <span class="points-number">{{ product.points }}</span>
+            <span class="points-label">puntos</span>
+          </div>
+        </div>
       </div>
 
       <!-- Empty State -->
       <div v-else class="empty-state">
         <i class="bi bi-inbox text-secondary"></i>
-        <p class="mt-3 text-secondary">No hay productos disponibles</p>
+        <p class="mt-3 text-secondary">No hay productos promocionales disponibles</p>
       </div>
 
-      <!-- View All Button -->
-      <div v-if="products.length > 0" class="view-all-products-wrapper mt-5">
-        <button class="btn btn-view-all" @click="exploreMenu">
-          Ver Todos los Productos <i class="bi bi-arrow-right ms-2"></i>
+      <!-- View All Offers Button -->
+      <div v-if="promotionalProducts.length > 0" class="view-all-offers-wrapper mt-5 view-all-right">
+        <button class="btn btn-view-all" @click="viewAllOffers">
+          Ver Todas las Ofertas <i class="bi bi-arrow-right ms-2"></i>
         </button>
       </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="cta-section">
-      <div class="cta-content">
-        <i class="bi bi-star-fill cta-icon"></i>
-        <h2 class="cta-title">Experimenta la Diferencia</h2>
-        <p class="cta-subtitle">Descubre sabores auténticos y productos de calidad premium que harán de cada comida un momento especial</p>
-        <div class="cta-buttons">
-          <button class="btn btn-warning btn-lg px-5 py-3" @click="exploreMenu">
-            <i class="bi bi-shop me-2"></i>Ver Productos
-          </button>
+    <!-- Stats Section -->
+    <section class="stats-section bg-dark-section">
+      <div class="stats-header-block">
+        <h2 class="section-title">Nuestra Experiencia</h2>
+      </div>
+      <div class="stats-subtitle-block">
+        <p class="section-subtitle">Más de una década ofreciendo calidad y satisfacción</p>
+      </div>
+      <div class="stats-container">
+        <div 
+          v-for="stat in stats" 
+          :key="stat.label"
+          class="stat-item"
+        >
+          <div class="stat-icon">
+            <i :class="stat.icon"></i>
+          </div>
+          <h3 class="stat-value">{{ stat.value }}</h3>
+          <p class="stat-label">{{ stat.label }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+  <section class="features-section bg-light-section">
+      <div class="section-header text-center mb-5">
+        <h2 class="section-title">¿Por Qué Elegirnos?</h2>
+        <p class="section-subtitle">Compromiso con la excelencia en cada detalle</p>
+      </div>
+      <div class="features-grid">
+        <div 
+          v-for="feature in features" 
+          :key="feature.title"
+          class="feature-card"
+        >
+          <div class="feature-icon">
+            <i :class="feature.icon"></i>
+          </div>
+          <h3 class="feature-title">{{ feature.title }}</h3>
+          <p class="feature-description">{{ feature.description }}</p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Restaurant Information Section -->
+    <section class="restaurant-info-section">
+      <div class="restaurant-info-card">
+        <h2 class="restaurant-title">Sobre Nuestro Restaurante</h2>
+        <p class="restaurant-subtitle">Autenticidad, calidad y tradición en cada plato</p>
+        <div class="restaurant-details">
+          <div class="detail-item"><i class="bi bi-geo-alt"></i><span><strong>Dirección:</strong> Calle Principal 123, Ciudad, País</span></div>
+          <div class="detail-item"><i class="bi bi-telephone"></i><span><strong>Teléfono:</strong> +34 123 456 789</span></div>
+          <div class="detail-item"><i class="bi bi-envelope"></i><span><strong>Email:</strong> contacto@restaurante.com</span></div>
+          <div class="detail-item"><i class="bi bi-clock"></i><span><strong>Horario:</strong> Lunes a Domingo, 12:00 - 23:00</span></div>
+        </div>
+        <div class="restaurant-social">
+          <a href="https://facebook.com" target="_blank" rel="noopener" class="social-icon facebook"><i class="bi bi-facebook"></i></a>
+          <a href="https://instagram.com" target="_blank" rel="noopener" class="social-icon instagram"><i class="bi bi-instagram"></i></a>
+          <a href="https://twitter.com" target="_blank" rel="noopener" class="social-icon twitter"><i class="bi bi-twitter-x"></i></a>
         </div>
       </div>
     </section>
@@ -361,216 +374,45 @@ onMounted(() => {
   overflow-x: hidden;
 }
 
-/* Professional Hero Slider */
-.hero-slider {
-  position: relative;
-  margin: 0;
-  margin-top: 1rem;
-  height: 400px;
-  overflow: hidden;
+.stats-header-block {
   width: 100%;
+  text-align: center;
+  margin-bottom: 0.2rem;
 }
-
-.slider-container {
-  position: relative;
+.stats-subtitle-block {
   width: 100%;
-  height: 100%;
-}
-
-.hero-slide {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-.hero-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-}
-
-.hero-content {
-  position: relative;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 0 1.5rem;
-  z-index: 1;
-}
-
-.content-wrapper {
-  max-width: 600px;
-  animation: slideInLeft 0.8s ease-out;
-}
-
-.hero-highlight {
-  display: inline-block;
-  background: var(--primary-color);
-  color: #1a1a1a;
-  padding: 0.35rem 1rem;
-  border-radius: 50px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 1rem;
-  box-shadow: 0 4px 15px rgba(252, 186, 27, 0.4);
-}
-
-.hero-title {
-  font-size: 2.5rem;
-  font-weight: 900;
-  color: #ffffff;
-  margin-bottom: 0.75rem;
-  line-height: 1.1;
-  text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.8);
-  font-family: 'Georgia', serif;
-  letter-spacing: -0.02em;
-}
-
-.hero-subtitle {
-  font-size: 1.25rem;
-  color: var(--primary-color);
-  margin-bottom: 0.75rem;
-  font-weight: 600;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-}
-
-.hero-description {
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
   margin-bottom: 1.5rem;
-  line-height: 1.6;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-  max-width: 500px;
 }
-
-.hero-actions {
+.stats-container {
   display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: center;
+  gap: 2rem;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-.hero-actions .btn {
-  font-weight: 600;
-  padding: 0.5rem 1.25rem;
-  font-size: 0.9rem;
-  border-radius: 50px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  border-width: 2px;
+
+.bg-light-section {
+  background: var(--bg-card) !important;
+}
+.bg-dark-section {
+  background: var(--bg-darker) !important;
 }
 
-.hero-actions .btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
-}
-
-/* Slider Indicators */
-.slider-indicators {
-  position: absolute;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 0.75rem;
-  z-index: 10;
-}
-
-.indicator {
-  width: 40px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.3);
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.indicator:hover {
-  background: rgba(255, 255, 255, 0.5);
-}
-
-.indicator.active {
-  background: var(--primary-color);
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
-}
-
-.indicator-progress {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  background: var(--primary-color);
-  animation: progressBar 4s linear;
-}
-
-/* Slide Transitions */
-.slide-fade-enter-active,
-.slide-fade-leave-active {
-  transition: all 0.8s ease;
-}
-
-.slide-fade-enter-from {
-  opacity: 0;
-  transform: translateX(100px);
-}
-
-.slide-fade-leave-to {
-  opacity: 0;
-  transform: translateX(-100px);
-}
-
-/* Content Animation */
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes progressBar {
-  from {
-    width: 0%;
-  }
-  to {
-    width: 100%;
-  }
-}
+/* ...existing code... */
 
 /* Stats Section */
 .stats-section {
   background: var(--bg-card);
-  padding: 0.5rem 0;
+  padding: 2rem 0.5rem 0.5rem 0.5rem;
   margin: 0;
-  display: flex;
-  align-items: center;
+  /* Removed display:flex and align-items:center to allow vertical stacking */
 }
 
-.stats-container {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
-  max-width: 100%;
-  margin: 0 auto;
-  padding: 0;
-  width: 100%;
-}
+
 
 .stat-item {
   text-align: center;
@@ -633,7 +475,7 @@ onMounted(() => {
 
 /* Features Section */
 .features-section {
-  padding: 5rem 1.5rem;
+  padding: 3rem 1.5rem;
   background: var(--bg-darker);
 }
 
@@ -716,7 +558,7 @@ onMounted(() => {
 
 /* Categories Section */
 .categories-section {
-  padding: 5rem 1.5rem;
+  padding: 3rem 1.5rem;
   max-width: 1400px;
   margin: 0 auto;
   background: var(--bg-card);
@@ -733,7 +575,7 @@ onMounted(() => {
 
 /* Products Section */
 .products-section {
-  padding: 5rem 1.5rem;
+  padding: 3rem 1.5rem;
   max-width: 1400px;
   margin: 0 auto;
   background: var(--bg-darker);
@@ -752,7 +594,7 @@ onMounted(() => {
 .error-state,
 .empty-state {
   text-align: center;
-  padding: 5rem 2rem;
+  padding: 3rem 2rem;
 }
 
 .loading-state .spinner-border {
@@ -784,10 +626,159 @@ onMounted(() => {
 }
 
 .btn-view-all:hover {
+  transform: translateY(-2px);
+}
+
+/* Promotions Section */
+.promotions-section {
+  padding: 3rem 0;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: var(--bg-card);
+}
+
+.promotions-section .section-header {
+  padding: 0 1.5rem;
+}
+
+.promotions-list {
+  max-width: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.promotion-item {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  background: var(--bg-darker);
+  border-radius: 0;
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  height: 120px;
+}
+
+.promotion-item:first-child {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.promotion-item:last-child {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.promotion-item:hover {
+  background: var(--bg-card);
+  border-left: 4px solid var(--primary-color);
+  box-shadow: inset 0 0 20px rgba(255, 215, 0, 0.1);
+}
+
+.promo-image {
+  flex-shrink: 0;
+  width: 120px;
+  height: 100%;
+  overflow: hidden;
+  border: none;
+  background: #1a1a1a;
+  padding: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.promo-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.promo-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  justify-content: center;
+  min-width: 0;
+}
+
+.promo-text {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.promo-description {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.promo-points {
+  flex-shrink: 0;
+  margin: 0 1.5rem;
+  color: #1a1a1a;
+  background: var(--primary-color);
+  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(252, 186, 27, 0.4);
+  align-self: center;
+}
+
+.points-number {
+  font-size: 1.4rem;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.points-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: rgba(26, 26, 26, 0.8);
+}
+
+.view-all-offers-wrapper {
+  text-align: right;
+  padding: 0 1.5rem;
+  margin-top: 3rem;
+}
+
+.btn-offers {
   background: var(--primary-color);
   color: #1a1a1a;
+  border: none;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+.btn-offers:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
 }
 
 /* CTA Section */
@@ -934,8 +925,71 @@ onMounted(() => {
     padding: 3rem 0.5rem;
   }
 
+  .promotions-section {
+    padding: 3rem 0;
+  }
+
+  .promotions-section .section-header {
+    padding: 0 0.5rem;
+  }
+
   .section-title {
     font-size: 1.5rem;
+  }
+
+  .promotions-list {
+    gap: 0;
+  }
+
+  .promotion-item {
+    height: 100px;
+  }
+
+  .promo-image {
+    width: 90px;
+    padding: 0.4rem 0;
+  }
+
+  .promo-content {
+    padding: 0.75rem 1rem;
+    gap: 0.3rem;
+  }
+
+  .promo-text {
+    font-size: 0.9rem;
+  }
+
+  .promo-description {
+    font-size: 0.8rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .promo-points {
+    width: 65px;
+    height: 65px;
+    margin: 0 1rem;
+  }
+
+  .points-number {
+    font-size: 1.1rem;
+  }
+
+  .points-label {
+    font-size: 0.5rem;
+  }
+
+  .view-all-offers-wrapper {
+    padding: 0 0.5rem;
+    margin-top: 2rem;
+  }
+
+  .btn-offers {
+    padding: 0.5rem 1.5rem;
+    font-size: 0.9rem;
   }
 
   .features-grid {
@@ -1002,12 +1056,6 @@ onMounted(() => {
     padding: 0.5rem 0;
     font-size: 0.85rem;
     font-weight: 500;
-  }
-
-  .btn-view-all:hover {
-    background: transparent;
-    transform: none;
-    box-shadow: none;
   }
 
   .cta-section {
@@ -1132,6 +1180,123 @@ onMounted(() => {
   }
   to {
     opacity: 1;
+  }
+}
+/* --- Restaurant Info Section Styles --- */
+.restaurant-info-section {
+  background: linear-gradient(135deg, var(--bg-darker) 60%, var(--primary-color) 100%);
+  padding: 3rem 0 0 0;
+  margin-bottom: 0 !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: unset;
+}
+
+.restaurant-info-card {
+  background: transparent;
+  box-shadow: none;
+  padding: 3rem 2rem 2.5rem 2rem;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  animation: fadeIn 0.7s cubic-bezier(.4,0,.2,1);
+}
+
+.restaurant-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+  font-family: 'Georgia', serif;
+}
+
+.restaurant-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin-bottom: 2.2rem;
+  font-weight: 400;
+}
+
+.restaurant-details {
+  margin-bottom: 2.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 1rem;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  padding: 0.7rem 1.1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: background 0.2s;
+}
+.detail-item i {
+  font-size: 1.3rem;
+  color: var(--primary-color);
+}
+
+.restaurant-social {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1.2rem;
+}
+.social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  color: var(--primary-color);
+  font-size: 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+.social-icon:hover {
+  background: var(--primary-color);
+  color: #1a1a1a;
+  transform: translateY(-4px) scale(1.08);
+}
+.social-icon.facebook:hover {
+  box-shadow: 0 4px 16px rgba(59,89,152,0.18);
+}
+.social-icon.instagram:hover {
+  box-shadow: 0 4px 16px rgba(225,48,108,0.18);
+}
+.social-icon.twitter:hover {
+  box-shadow: 0 4px 16px rgba(29,155,209,0.18);
+}
+
+@media (max-width: 576px) {
+  .restaurant-info-card {
+    padding: 1.5rem 0.5rem 1.5rem 0.5rem;
+  }
+  .restaurant-title {
+    font-size: 1.3rem;
+  }
+  .restaurant-details {
+    gap: 0.6rem;
+  }
+  .detail-item {
+    font-size: 0.95rem;
+    padding: 0.5rem 0.7rem;
+  }
+  .restaurant-social {
+    gap: 0.7rem;
+  }
+  .social-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 1.3rem;
   }
 }
 </style>

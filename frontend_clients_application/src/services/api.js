@@ -90,6 +90,13 @@ const api = {
   },
 
   // ==================== CATEGORIES ====================
+
+  /**
+   * Get most sold active categories (limit optional)
+   */
+  getMostSoldCategories(params = {}) {
+    return apiClient.get('/categories/most-sold', { params });
+  },
   
   /**
    * Get all active categories
@@ -113,6 +120,13 @@ const api = {
   },
 
   // ==================== PRODUCTS ====================
+
+  /**
+   * Get most sold active products (limit optional)
+   */
+  getMostSoldProducts(params = {}) {
+    return apiClient.get('/products/most-sold', { params });
+  },
   
   /**
    * Get all active products
@@ -126,6 +140,13 @@ const api = {
    */
   getActiveProducts() {
     return apiClient.get('/products/active');
+  },
+
+  /**
+   * Get products with points (promotional products)
+   */
+  getProductsWithPoints(params = {}) {
+    return apiClient.get('/products/with-points', { params });
   },
 
   /**

@@ -216,11 +216,6 @@ html {
 }
 
 /* Safe Area for Notch Devices */
-@supports (padding-bottom: env(safe-area-inset-bottom)) {
-  body {
-    padding-bottom: calc(var(--navbar-height) + env(safe-area-inset-bottom));
-  }
-}
 
 /* Bootstrap Overrides for Dark Theme */
 .btn {

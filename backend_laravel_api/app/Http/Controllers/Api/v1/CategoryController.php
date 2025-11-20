@@ -7,8 +7,55 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
-class CategoryController extends Controller
-{
+    class CategoryController extends Controller
+    {
+        /**
+         * Get most sold active categories based on orders
+         */
+        public function mostSold(Request $request): JsonResponse
+        {
+            $orders = \App\Models\Order::where('status', 'completed')->get(['items']);
+            $categoryCounts = [];
+            foreach ($orders as $order) {
+                $items = is_array($order->items) ? $order->items : json_decode($order->items, true);
+                if (is_array($items)) {
+                    foreach ($items as $item) {
+                        $pid = $item['product_id'] ?? null;
+                        $qty = $item['quantity'] ?? 1;
+                        if ($pid) {
+                            $product = \App\Models\Product::find($pid);
+                            if ($product && $product->status === 'active' && $product->category_id) {
+                                $cid = $product->category_id;
+                                if (!isset($categoryCounts[$cid])) $categoryCounts[$cid] = 0;
+                                $categoryCounts[$cid] += $qty;
+                            }
+                        }
+                    }
+                }
+            }
+            if (empty($categoryCounts)) {
+                // No sales yet, return 4 random active categories
+                $categories = Category::where('status', 'active')->inRandomOrder()->limit(4)->get()->values();
+            } else {
+                // Get active categories only, sorted by sold_count
+                $categories = Category::where('status', 'active')
+                    ->whereIn('id', array_keys($categoryCounts))
+                    ->get()
+                    ->map(function($category) use ($categoryCounts) {
+                        $category->sold_count = $categoryCounts[$category->id] ?? 0;
+                        return $category;
+                    })
+                    ->sortByDesc('sold_count')
+                    ->values()
+                    ->take(4)
+                    ->values();
+            }
+            return response()->json([
+                'success' => true,
+                'message' => 'Most sold categories retrieved successfully',
+                'data' => $categories
+            ]);
+        }
     /**
      * Get all categories
      */

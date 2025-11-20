@@ -72,215 +72,162 @@ const continueAsGuest = () => {
 </script>
 
 <template>
-  <div class="login-page">
-    <div class="login-container">
-      <div class="login-header">
-        <h1>Iniciar Sesión</h1>
-        <p>Accede a tu cuenta de ByCrousty</p>
-      </div>
-
+  <div class="login-page bg-dark-section">
+  <div class="login-container card-mobile">
+  <div style="padding-top: 1.2rem;"></div>
+  <img src="/logo.png" alt="ByCrousty Logo" class="login-logo" />
+  <h2 class="login-title page-title text-primary">Bienvenido a ByCrousty</h2>
       <form @submit.prevent="handleLogin" class="login-form">
-        <!-- Email Field -->
-        <div class="mb-3">
-          <label for="email" class="form-label">
-            <i class="bi bi-envelope me-2"></i>Email
-          </label>
+        <div class="form-group-mobile">
+          <label for="email"><i class="bi bi-envelope" style="margin-right:6px;"></i>Correo electrónico</label>
           <input
             id="email"
             v-model="formData.email"
             type="email"
-            class="form-control form-control-lg"
-            :class="{ 'is-invalid': errors.email }"
-            placeholder="tu@email.com"
+            :class="['input-mobile', { 'is-invalid': errors.email }]"
+            placeholder="Introduce tu correo profesional"
+            autocomplete="username"
           />
           <div v-if="errors.email" class="invalid-feedback">{{ errors.email }}</div>
         </div>
-
-        <!-- Password Field -->
-        <div class="mb-4">
-          <label for="password" class="form-label">
-            <i class="bi bi-lock me-2"></i>Contraseña
-          </label>
+        <div class="form-group-mobile">
+          <label for="password"><i class="bi bi-lock" style="margin-right:6px;"></i>Contraseña</label>
           <input
             id="password"
             v-model="formData.password"
             type="password"
-            class="form-control form-control-lg"
-            :class="{ 'is-invalid': errors.password }"
-            placeholder="Tu contraseña"
+            :class="['input-mobile', { 'is-invalid': errors.password }]"
+            placeholder="Introduce tu contraseña"
+            autocomplete="current-password"
           />
           <div v-if="errors.password" class="invalid-feedback">{{ errors.password }}</div>
         </div>
-
-        <!-- Submit Button -->
-        <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold mb-3" :disabled="loading">
-          <span v-if="loading">
-            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-            Iniciando sesión...
-          </span>
-          <span v-else>
-            <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
-          </span>
+  <button type="submit" class="btn-primary-mobile btn-mobile login-btn-compact" :disabled="loading">
+          <span v-if="loading">Accediendo...</span>
+          <span v-else><i class="bi bi-box-arrow-in-right" style="margin-right:6px;"></i>Acceder</span>
         </button>
       </form>
-
-      <!-- Alternative Actions -->
-      <div class="login-footer">
-        <p class="text-center text-secondary mb-3">¿No tienes cuenta?</p>
-        <button type="button" class="btn btn-outline-light btn-lg w-100 mb-3" @click="goToRegister">
-          <i class="bi bi-person-plus me-2"></i>Registrarse
-        </button>
-
-        <div class="divider my-3">
-          <span class="px-3">o</span>
-        </div>
-
-        <button type="button" class="btn btn-outline-secondary btn-lg w-100" @click="continueAsGuest">
-          <i class="bi bi-arrow-right-circle me-2"></i>Continuar como invitado
-        </button>
+      <div class="login-actions">
+  <button type="button" class="btn-link w-100" @click="goToRegister">¿No tienes cuenta? Regístrate</button>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.login-page {
-  min-height: calc(100vh - 120px);
+.form-group-mobile label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
+}
+.login-logo {
+  display: block;
+  margin: 0 auto 1rem auto;
+  max-width: 90px;
+  max-height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+}
+.login-btn-compact {
+  width: auto;
+  min-width: 120px;
+  max-width: 100%;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Use global and HomePage color variables and classes for consistency */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
   justify-content: center;
-  padding: 2rem 1rem;
+  background: var(--bg-darker);
+  padding-top: 4rem;
 }
 
 .login-container {
   width: 100%;
-  max-width: 450px;
-  background: var(--bg-card);
-  border-radius: 16px;
-  padding: 2rem;
+  max-width: 350px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
   border: 1px solid var(--border-color);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  background: var(--bg-card);
+  margin-top: 0;
+  padding-top: 0;
+}
+.login-container {
+  width: 100%;
+  max-width: 350px;
+  /* Use card-mobile for unified style */
+  background: var(--bg-card);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  padding: 0.85rem;
+  margin-bottom: 0.65rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  padding-bottom: 2rem;
 }
 
-.login-header {
+.login-title {
   text-align: center;
-  margin-bottom: 2rem;
-}
-
-.login-header h1 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+  margin-top: 0;
   color: var(--primary-color);
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-.login-header p {
-  color: var(--text-secondary);
 }
 
 .login-form {
-  margin-bottom: 2rem;
-}
-
-.form-label {
-  color: var(--text-primary);
-  font-weight: 600;
-  font-size: 0.95rem;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 1.1rem;
+  padding: 2rem 0rem;
 }
 
-.form-control {
-  background-color: var(--bg-darker);
-  border: 2px solid var(--border-color);
-  color: var(--text-primary);
-  padding: 0.75rem 1rem;
+.invalid-feedback {
+  color: #e74c3c;
+  font-size: 0.92rem;
+  margin-top: 0.2rem;
 }
 
-.form-control:focus {
-  background-color: var(--bg-card);
-  border-color: var(--primary-color);
-  color: var(--text-primary);
-  box-shadow: 0 0 0 0.25rem rgba(255, 215, 0, 0.25);
+.login-actions {
+  margin-top: 0.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
-
-.form-control::placeholder {
+.btn-link {
+  background: none;
+  border: none;
   color: var(--text-secondary);
+  text-align: center;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  border-radius: 4px;
+  transition: background 0.15s, color 0.15s;
 }
-
-.btn-warning {
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
-  color: #000;
-}
-
-.btn-warning:hover {
-  background-color: var(--primary-dark);
-  border-color: var(--primary-dark);
-  color: #000;
-}
-
-.btn-outline-light {
-  border: 2px solid var(--border-color);
-  color: var(--text-primary);
-}
-
-.btn-outline-light:hover {
-  background-color: var(--bg-card);
-  border-color: var(--primary-color);
+.btn-link:hover {
+  background: var(--bg-card);
   color: var(--primary-color);
 }
-
-.btn-outline-secondary {
+.input-mobile {
+  width: 100%;
+  padding: 0.65rem 1rem;
   border: 2px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background-color: var(--bg-darker);
+  color: var(--text-primary);
+  transition: border-color 0.3s;
 }
-
-.login-footer {
-  text-align: center;
-}
-
-.divider {
-  position: relative;
-  text-align: center;
-  margin: 1.5rem 0;
-}
-
-.divider::before,
-.divider::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: 40%;
-  height: 1px;
-  background: var(--border-color);
-}
-
-.divider::before {
-  left: 0;
-}
-
-.divider::after {
-  right: 0;
-}
-
-.divider span {
-  background: var(--bg-card);
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-}
-
-/* Animation */
-.login-container {
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.btn-primary-mobile.btn-mobile {
+  padding: 0.7rem 1.2rem;
+  font-size: 1rem;
 }
 </style>

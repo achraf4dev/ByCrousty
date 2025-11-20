@@ -3,11 +3,13 @@
  * Cart Page
  * Shopping cart with items and checkout
  */
+
 import { computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCartStore } from '../store/cart';
 import { useAuth } from '../store/auth';
 import { useUI } from '../store/ui';
+import { isProductActive } from '../services/productStatus';
 
 const router = useRouter();
 const cartStore = useCartStore();
@@ -69,16 +71,36 @@ const continueShopping = () => {
 };
 
 onMounted(() => {
-  cartStore.loadCart();
+  // On cart load, check for inactive products and remove them
+  const checkAndCleanCart = async () => {
+    await cartStore.loadCart();
+    const { cartItems } = cartStore;
+    const items = cartItems.value.slice();
+    let removedCount = 0;
+    for (const item of items) {
+      const productId = item.product_id || item.id;
+      const active = await isProductActive(productId);
+      if (!active) {
+        await cartStore.removeItem(productId);
+        removedCount++;
+      }
+    }
+    if (removedCount > 0) {
+      showSuccess(`${removedCount} producto(s) eliminados del carrito por estar inactivos.`);
+    }
+  };
+  checkAndCleanCart();
 });
 </script>
 
 <template>
   <div class="cart-page">
-    <div class="page-header">
-      <h1><i class="bi bi-cart"></i> Mi Carrito</h1>
-      <p v-if="!isEmpty">{{ itemCount }} artículo(s) en tu carrito</p>
-    </div>
+    <header class="cart-header">
+      <div>
+        <h1 class="cart-title"><i class="bi bi-cart"></i> Mi Carrito</h1>
+        <p v-if="!isEmpty" class="cart-subtitle">{{ itemCount }} artículo(s) en tu carrito</p>
+      </div>
+    </header>
 
     <!-- Empty Cart -->
     <div v-if="isEmpty" class="empty-cart text-center py-5">
@@ -194,28 +216,34 @@ onMounted(() => {
 
 <style scoped>
 .cart-page {
-  max-width: 1200px;
-  margin: 0 auto;
+  background: var(--bg-darker);
+  min-height: 100vh;
+  padding: 1.5rem;
 }
 
-.page-header {
-  text-align: center;
-  margin-bottom: 3rem;
-}
 
-.page-header h1 {
+.cart-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 2.2rem;
+  padding-left: 0;
+  padding-top: 0;
+  padding-right: 0;
+  padding-bottom: 0;
+}
+.cart-title {
   color: var(--primary-color);
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.15rem;
+  margin-bottom: 0.1rem;
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 0.75rem;
 }
-
-.page-header p {
+.cart-subtitle {
   color: var(--text-secondary);
-  font-size: 1.1rem;
+  font-size: 1.05rem;
+  margin-bottom: 0;
 }
 
 .empty-cart {
@@ -251,19 +279,20 @@ onMounted(() => {
   gap: 1rem;
 }
 
-.cart-item {
-  display: grid;
-  grid-template-columns: 100px 1fr auto;
-  gap: 1rem;
+.cart-item, .summary-card {
   background: var(--bg-card);
-  border-radius: 12px;
-  padding: 1rem;
+  border-radius: 10px;
   border: 1px solid var(--border-color);
-  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  padding: 0.85rem;
+  margin-bottom: 0.65rem;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.3s;
 }
 
 .cart-item:hover {
   border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.1);
 }
 
 .item-image {
@@ -288,14 +317,14 @@ onMounted(() => {
 
 .item-name {
   color: var(--text-primary);
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   margin-bottom: 0.5rem;
 }
 
 .item-price {
   color: var(--primary-color);
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.98rem;
   margin-bottom: 0.5rem;
 }
 
@@ -345,7 +374,7 @@ onMounted(() => {
 .item-total {
   color: var(--primary-color);
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
 }
 
 .btn-remove {
@@ -370,13 +399,6 @@ onMounted(() => {
 .cart-summary {
   position: sticky;
   top: 80px;
-}
-
-.summary-card {
-  background: var(--bg-card);
-  border-radius: 12px;
-  padding: 2rem;
-  border: 1px solid var(--border-color);
 }
 
 .summary-card h3 {

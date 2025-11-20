@@ -13,6 +13,14 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  hideAddToCart: {
+    type: Boolean,
+    default: false,
+  },
+  imageHeight: {
+    type: [String, Number],
+    default: null,
+  },
 });
 
 const router = useRouter();
@@ -51,38 +59,34 @@ const addToCart = async (event) => {
 <template>
   <div class="product-card" @click="viewDetails">
     <!-- Product Image -->
-    <div class="product-image">
-      <img :src="productImage" :alt="product.name" />
+    <div class="product-image" :style="imageHeight ? { height: typeof imageHeight === 'number' ? imageHeight + 'px' : imageHeight } : {}">
+      <img :src="productImage" :alt="product.name" :style="imageHeight ? { height: '100%' } : {}" />
       
       <!-- Price Tag -->
       <div class="price-tag">
         {{ formattedPrice }}
       </div>
-      
-      <div v-if="isInCart" class="in-cart-badge">
-        <i class="bi bi-check-circle-fill"></i>
+
+      <!-- Product Info Overlay -->
+      <div class="product-info-overlay">
+        <h4 class="product-name">{{ product.name }}</h4>
+        <p v-if="product.description" class="product-description">
+          {{ product.description.substring(0, 60) }}{{ product.description.length > 60 ? '...' : '' }}
+        </p>
       </div>
     </div>
 
-    <!-- Product Info -->
-    <div class="product-info">
-      <h4 class="product-name">{{ product.name }}</h4>
-      <p v-if="product.description" class="product-description">
-        {{ product.description.substring(0, 60) }}{{ product.description.length > 60 ? '...' : '' }}
-      </p>
-      
-      <!-- Add to Cart Button -->
-      <div class="product-footer">
-        <button 
-          class="btn btn-sm rounded-circle"
-          :class="isInCart ? 'btn-success' : 'btn-warning'"
-          style="width: 40px; height: 40px;"
-          @click="addToCart"
-          :disabled="isInCart"
-        >
-          <i :class="isInCart ? 'bi bi-check' : 'bi bi-cart-plus'"></i>
-        </button>
-      </div>
+    <!-- Add to Cart Button -->
+    <div v-if="!hideAddToCart" class="product-footer">
+      <button 
+        class="btn btn-sm rounded-circle"
+        :class="isInCart ? 'btn-success' : 'btn-warning'"
+        style="width: 40px; height: 40px;"
+        @click="addToCart"
+        :disabled="isInCart"
+      >
+        <i :class="isInCart ? 'bi bi-check' : 'bi bi-cart-plus'"></i>
+      </button>
     </div>
   </div>
 </template>
@@ -131,58 +135,52 @@ const addToCart = async (event) => {
   right: 0;
   background: var(--primary-color);
   color: #1a1a1a;
-  padding: 0.4rem 0.75rem;
+  padding: 0.3rem 0.5rem;
   border-radius: 0 12px 0 12px;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 700;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   z-index: 2;
 }
 
-.in-cart-badge {
+.product-info-overlay {
   position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
-  background: var(--success-color);
-  color: white;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-  z-index: 2;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.6) 70%, transparent 100%);
+  z-index: 1;
+  transition: all 0.3s ease;
 }
 
-.product-info {
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
+.product-card:hover .product-info-overlay {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.7) 70%, transparent 100%);
 }
 
 .product-name {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #ffffff;
   margin-bottom: 0.5rem;
   line-height: 1.3;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 .product-description {
   font-size: 0.875rem;
-  color: var(--text-secondary);
-  margin-bottom: 1rem;
-  flex: 1;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0;
   line-height: 1.4;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .product-footer {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: auto;
+  padding: 1rem;
+  background: var(--bg-card);
 }
 
 .btn-add-cart {
@@ -219,7 +217,7 @@ const addToCart = async (event) => {
   }
 
   .product-name {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
 }
 </style>

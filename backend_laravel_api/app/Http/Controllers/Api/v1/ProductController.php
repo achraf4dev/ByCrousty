@@ -1,15 +1,61 @@
 <?php
 
-namespace App\Http\Controllers\Api\v1;
+    namespace App\Http\Controllers\Api\v1;
 
-use App\Http\Controllers\Controller;
-use App\Models\Product;
-use App\Models\Category;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
+    use App\Http\Controllers\Controller;
+    use App\Models\Product;
+    use App\Models\Category;
+    use Illuminate\Http\Request;
+    use Illuminate\Http\JsonResponse;
 
-class ProductController extends Controller
-{
+    class ProductController extends Controller
+    {
+        /**
+         * Get most sold active products based on orders
+         */
+        public function mostSold(Request $request): JsonResponse
+        {
+            // Only count completed orders
+            $orders = \App\Models\Order::where('status', 'completed')->get(['items']);
+            $productCounts = [];
+            foreach ($orders as $order) {
+                $items = is_array($order->items) ? $order->items : json_decode($order->items, true);
+                if (is_array($items)) {
+                    foreach ($items as $item) {
+                        $pid = $item['product_id'] ?? null;
+                        $qty = $item['quantity'] ?? 1;
+                        if ($pid) {
+                            if (!isset($productCounts[$pid])) $productCounts[$pid] = 0;
+                            $productCounts[$pid] += $qty;
+                        }
+                    }
+                }
+            }
+            if (empty($productCounts)) {
+                // No sales yet, return 8 random active products
+                $products = Product::where('status', 'active')->with('category')->inRandomOrder()->limit(9)->get()->values();
+            } else {
+                // Get active products only, sorted by sold_count
+                $products = Product::where('status', 'active')
+                    ->whereIn('id', array_keys($productCounts))
+                    ->with('category')
+                    ->get()
+                    ->map(function($product) use ($productCounts) {
+                        $product->sold_count = $productCounts[$product->id] ?? 0;
+                        return $product;
+                    })
+                    ->sortByDesc('sold_count')
+                    ->values()
+                    ->take(9)
+                    ->values();
+            }
+            return response()->json([
+                'success' => true,
+                'message' => 'Most sold products retrieved successfully',
+                'total_sold_products' => count($products),
+                'data' => $products
+            ]);
+        }
     /**
      * Get all products
      */
@@ -193,6 +239,34 @@ class ProductController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve products by category',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get products with points (promotional products)
+     */
+    public function withPoints(Request $request): JsonResponse
+    {
+        try {
+            $query = Product::with('category')
+                ->where('status', 'active')
+                ->where('points', '>', 0)
+                ->orderBy('points', 'asc'); // Sort by points ascending (lowest first)
+
+            $products = $query->paginate($request->get('per_page', 15));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Promotional products retrieved successfully',
+                'data' => $products
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve promotional products',
                 'error' => $e->getMessage()
             ], 500);
         }

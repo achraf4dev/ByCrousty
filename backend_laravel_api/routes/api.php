@@ -33,10 +33,13 @@ Route::prefix('v1')->group(function () {
     // Public endpoints (no authentication required)
     Route::get('categories', [CategoryController::class, 'index']);
     Route::get('categories/active', [CategoryController::class, 'active']);
+    Route::get('categories/most-sold', [CategoryController::class, 'mostSold']);
     Route::get('categories/{id}', [CategoryController::class, 'show']);
     
     Route::get('products', [ProductController::class, 'index']);
     Route::get('products/active', [ProductController::class, 'active']);
+    Route::get('products/with-points', [ProductController::class, 'withPoints']);
+    Route::get('products/most-sold', [ProductController::class, 'mostSold']);
     Route::get('products/{id}', [ProductController::class, 'show']);
     Route::get('categories/{id}/products', [ProductController::class, 'byCategory']);
 
