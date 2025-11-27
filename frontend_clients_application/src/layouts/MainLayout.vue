@@ -39,8 +39,7 @@ watch(() => route.path, () => {
     <!-- Top Navbar (Hidden on welcome page) -->
     <TopNavbar v-if="shouldShowTopNavbar()" />
 
-    <!-- Sidebar Drawer -->
-    <SidebarDrawer />
+      <!-- Sidebar Drawer removed -->
 
     <!-- Main Content Area -->
     <main class="main-content" :class="{ 

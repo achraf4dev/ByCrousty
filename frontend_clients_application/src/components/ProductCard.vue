@@ -94,7 +94,7 @@ const addToCart = async (event) => {
 <style scoped>
 .product-card {
   background: var(--bg-card);
-  border-radius: 12px;
+  border-radius: 12px 12px 0px 0px;
   overflow: hidden;
   cursor: pointer;
   transition: all 0.3s ease;

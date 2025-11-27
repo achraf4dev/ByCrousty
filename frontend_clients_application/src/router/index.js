@@ -15,6 +15,8 @@ import LoginPage from '../pages/LoginPage.vue';
 import RegisterPage from '../pages/RegisterPage.vue';
 import CartPage from '../pages/CartPage.vue';
 import ProfilePage from '../pages/ProfilePage.vue';
+import MenuPage from '../pages/MenuPage.vue';
+import OfferPage from '../pages/OfferPage.vue';
 
 // Define routes
 const routes = [
@@ -42,6 +44,18 @@ const routes = [
     path: '/categories',
     name: 'Categories',
     component: CategoriesPage,
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/menu',
+    name: 'Menu',
+    component: MenuPage,
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/offer',
+    name: 'Offer',
+    component: OfferPage,
     meta: { requiresAuth: false },
   },
   {

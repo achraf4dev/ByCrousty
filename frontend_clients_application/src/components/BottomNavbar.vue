@@ -12,8 +12,8 @@ const router = useRouter();
 // Navigation items
 const navItems = [
   { name: 'home', icon: 'bi-house', label: 'Inicio', route: '/home' },
-  { name: 'categories', icon: 'bi-grid', label: 'Categorías', route: '/categories' },
-  { name: 'cart', icon: 'bi-cart', label: 'Carrito', route: '/cart' },
+  { name: 'categories', icon: 'bi-list', label: 'Carta', route: '/menu' },
+  { name: 'offers', icon: 'bi-star-fill', label: 'Ofertas', route: '/offer' },
   { name: 'profile', icon: 'bi-person', label: 'Perfil', route: '/profile' },
 ];
 

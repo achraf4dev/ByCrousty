@@ -44,11 +44,12 @@ onMounted(() => {
 <template>
   <nav class="top-navbar">
     <div class="navbar-content">
-      <!-- Left: Toggle Button -->
+      <!-- Left: User Points Indicator -->
       <div class="navbar-left">
-        <button class="toggle-button" @click="openSidebar" aria-label="Menu">
-          <i class="bi bi-list"></i>
-        </button>
+        <div v-if="isAuthenticated" class="user-points">
+          <i class="bi bi-star-fill"></i>
+          <span class="points-value">{{ user?.points ?? 0 }}</span>
+        </div>
       </div>
 
       <!-- Center: Logo -->
@@ -76,6 +77,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
+
 .top-navbar {
   position: fixed;
   top: 0;
@@ -85,6 +87,21 @@ onMounted(() => {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
   z-index: 1000;
   padding-top: env(safe-area-inset-top, 0);
+}
+
+.user-points {
+  display: flex;
+  align-items: center;
+  font-size: 1.1rem;
+  color: #ffd700;
+  margin-right: 1rem;
+}
+.user-points .bi-star-fill {
+  margin-right: 0.3em;
+}
+.points-value {
+  font-weight: bold;
+  color: #fff;
 }
 
 .navbar-content {

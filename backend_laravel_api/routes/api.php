@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\v1\ProductController;
 use App\Http\Controllers\Api\v1\AdminController;
 use App\Http\Controllers\Api\v1\CartController;
 use App\Http\Controllers\Api\v1\StaticContentController;
+use App\Http\Controllers\Api\v1\MenuController;
 
 Route::get('/v1/user', function (Request $request) {
     return $request->user();
@@ -24,6 +25,8 @@ Route::prefix('v1')->group(function () {
     Route::get('verify/{id}/{hash}', [AuthController::class, 'verify'])->name('verification.verify');
 
     // ==================== CLIENT ROUTES ====================
+    // Menu endpoint: active categories with products
+    Route::get('menu', [MenuController::class, 'index']);
     
     // Client Static Content (Public)
     Route::get('static/about', [StaticContentController::class, 'about']);
