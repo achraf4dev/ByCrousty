@@ -3,10 +3,11 @@
  * Profile Page
  * User profile information and logout
  */
-import { computed } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuth } from '../store/auth';
 import { useUI } from '../store/ui';
+import api from '../services/api';
 
 const router = useRouter();
 const { user, logout } = useAuth();
@@ -16,6 +17,58 @@ const userPoints = computed(() => user.value?.points || 0);
 const userName = computed(() => user.value?.full_name || user.value?.username || 'Usuario');
 const userEmail = computed(() => user.value?.email || '');
 const userPhone = computed(() => user.value?.phone_number || 'No especificado');
+
+const qrSrc = ref('');
+const loadingQr = ref(false);
+
+const fetchQr = async () => {
+  loadingQr.value = true;
+  try {
+    const res = await api.getMyQrCode();
+
+    const contentType = (res?.headers && (res.headers['content-type'] || res.headers['Content-Type'])) || '';
+
+    // If backend returned JSON (typical: { qr: 'data:...', qr_url: '...' })
+    if (contentType.toLowerCase().includes('application/json')) {
+      const data = res?.data || {};
+      qrSrc.value = data.qr || data.qr_url || data.url || data.data?.qr || data.data?.qr_url || '';
+      if (!qrSrc.value && data.code) {
+        qrSrc.value = `data:image/png;base64,${data.code}`;
+      }
+    } else if (contentType.toLowerCase().startsWith('image/')) {
+      // Backend served image/png (binary). Fetch as arraybuffer and convert to data URI.
+      try {
+        const dataUri = await api.getMyQrCodeImage();
+        qrSrc.value = dataUri;
+      } catch (err) {
+        console.warn('ProfilePage: failed to fetch QR image as arraybuffer', err);
+        qrSrc.value = '';
+      }
+    } else {
+      // Fallback: try to parse as JSON first, otherwise try binary fetch
+      const data = res?.data || {};
+      qrSrc.value = data.qr || '';
+      if (!qrSrc.value) {
+        try {
+          const dataUri = await api.getMyQrCodeImage();
+          qrSrc.value = dataUri;
+        } catch (err) {
+          console.warn('ProfilePage: unexpected QR response format', err);
+          qrSrc.value = '';
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Could not load user QR code', err);
+    qrSrc.value = '';
+  } finally {
+    loadingQr.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchQr();
+});
 
 const handleLogout = async () => {
   if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
@@ -33,66 +86,53 @@ const goToHome = () => {
 <template>
   <div class="profile-page">
     <div class="profile-container">
-      <!-- Profile Header -->
-      <div class="profile-header">
-        <div class="profile-avatar">
-          <i class="bi bi-person-circle"></i>
+      <!-- QR + Name Header -->
+      <div class="profile-header-qr">
+        <div class="qr-area">
+          <div v-if="loadingQr" class="qr-placeholder">Cargando QR...</div>
+          <img v-else-if="qrSrc" :src="qrSrc" alt="QR code" class="qr-image" />
+          <div v-else class="profile-avatar-fallback">
+            <i class="bi bi-person-circle"></i>
+          </div>
         </div>
+
         <h1>{{ userName }}</h1>
-        <p>{{ userEmail }}</p>
       </div>
 
-      <!-- Points Card -->
-      <div class="points-card">
-        <div class="points-icon">
-          <i class="bi bi-star-fill"></i>
-        </div>
-        <div class="points-info">
-          <h3>Tus Puntos</h3>
-          <p class="points-value">{{ userPoints }}</p>
-          <span class="points-label">puntos acumulados</span>
-        </div>
-      </div>
+      <!-- Tabs Navigation -->
+      <nav class="profile-tabs" role="navigation" aria-label="Perfil">
+        <router-link to="/profile/account" class="tab" active-class="active">
+          <i class="bi bi-person tab-icon" aria-hidden="true"></i>
+          <span class="tab-text">Cuenta</span>
+        </router-link>
 
-      <!-- Profile Info -->
-      <div class="profile-info">
-        <h3>Información Personal</h3>
-        
-        <div class="info-item">
-          <div class="info-label">
-            <i class="bi bi-person"></i>
-            <span>Nombre Completo</span>
-          </div>
-          <div class="info-value">{{ userName }}</div>
-        </div>
+        <router-link to="/profile/settings" class="tab" active-class="active">
+          <i class="bi bi-gear tab-icon" aria-hidden="true"></i>
+          <span class="tab-text">Ajustes</span>
+        </router-link>
 
-        <div class="info-item">
-          <div class="info-label">
-            <i class="bi bi-envelope"></i>
-            <span>Email</span>
-          </div>
-          <div class="info-value">{{ userEmail }}</div>
-        </div>
+        <router-link to="/profile/orders" class="tab" active-class="active">
+          <i class="bi bi-bag tab-icon" aria-hidden="true"></i>
+          <span class="tab-text">Pedidos</span>
+        </router-link>
 
-        <div class="info-item">
-          <div class="info-label">
-            <i class="bi bi-telephone"></i>
-            <span>Teléfono</span>
-          </div>
-          <div class="info-value">{{ userPhone }}</div>
-        </div>
-      </div>
+        <router-link to="/profile/locations" class="tab" active-class="active">
+          <i class="bi bi-geo-alt tab-icon" aria-hidden="true"></i>
+          <span class="tab-text">Dónde encontrarnos</span>
+        </router-link>
 
-      <!-- Actions -->
-      <div class="profile-actions">
-        <button class="btn btn-outline-light btn-lg w-100 mb-3" @click="goToHome">
-          <i class="bi bi-house me-2"></i>Ir al Inicio
+        <router-link to="/profile/change-password" class="tab" active-class="active">
+          <i class="bi bi-key tab-icon" aria-hidden="true"></i>
+          <span class="tab-text">Cambiar contraseña</span>
+        </router-link>
+
+        <button class="tab logout" type="button" @click="handleLogout">
+          <i class="bi bi-box-arrow-right tab-icon" aria-hidden="true"></i>
+          <span class="tab-text">Cerrar sesión</span>
         </button>
+      </nav>
 
-        <button class="btn btn-danger btn-lg w-100" @click="handleLogout">
-          <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
-        </button>
-      </div>
+      <!-- Sub-pages removed per request -->
     </div>
   </div>
 </template>
@@ -106,6 +146,72 @@ const goToHome = () => {
 .profile-container {
   animation: fadeIn 0.3s ease;
 }
+
+.profile-header-qr {
+  text-align: center;
+  padding: 1.25rem 0.5rem; /* reduce left/right padding so QR uses more horizontal space */
+  background: var(--bg-card);
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border-color);
+}
+
+.qr-area { width: 200px; height: 200px; margin: 0 auto .6rem; display:flex; align-items:center; justify-content:center; overflow: hidden; background: #fff; border: 1px solid var(--border-color); box-shadow: 0 6px 14px rgba(0,0,0,0.06); padding: 5px; }
+.qr-image { width: 100%; height: 100%; object-fit: contain; border-radius: 6px; background: transparent; display: block; transform: none; }
+.qr-placeholder { width: 190px; height: 190px; display:flex; align-items:center; justify-content:center; background:var(--bg-card); border-radius:10px; color:var(--text-secondary); }
+.profile-avatar-fallback i { font-size:5.5rem; color:var(--primary-color); }
+
+.profile-header-qr h1 { color: var(--text-primary); font-size:1.45rem; margin: .25rem 0; font-weight:600; }
+.profile-header-qr .email { color:var(--text-secondary); margin:0; }
+
+.profile-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* no gap so elements are flush; separation via bottom border */
+  margin: 1rem 0 1.25rem 0;
+}
+.profile-tabs .tab {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  text-align: left;
+  padding: 1rem 1rem; /* a bit larger */
+  border-radius: 0; /* square corners */
+  background: transparent; /* remove boxed backgrounds */
+  border: none;
+  border-bottom: 1px solid var(--border-color); /* only bottom border */
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.05rem; /* slightly larger text */
+}
+.profile-tabs .tab.active {
+  color: var(--primary-contrast, #fff);
+  border-bottom-color: var(--primary-color);
+}
+.profile-tabs .tab.logout {
+  background: transparent;
+  color: var(--danger-color);
+  margin-left: 0;
+  text-align: left;
+}
+
+.tab-icon {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+}
+.profile-tabs .tab.active .tab-icon {
+  color: var(--primary-color);
+}
+.profile-tabs .tab.logout .tab-icon {
+  color: var(--danger-color);
+}
+.tab-text {
+  display: inline-block;
+}
+
+.profile-subpage { margin-top: .5rem; }
 
 .profile-header {
   text-align: center;

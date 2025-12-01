@@ -15,6 +15,11 @@ import LoginPage from '../pages/LoginPage.vue';
 import RegisterPage from '../pages/RegisterPage.vue';
 import CartPage from '../pages/CartPage.vue';
 import ProfilePage from '../pages/ProfilePage.vue';
+import ProfileAccount from '../pages/profile/ProfileAccount.vue';
+import ProfileSettings from '../pages/profile/ProfileSettings.vue';
+import ProfileOrders from '../pages/profile/ProfileOrders.vue';
+import ProfileLocations from '../pages/profile/ProfileLocations.vue';
+import ProfileChangePassword from '../pages/profile/ProfileChangePassword.vue';
 import MenuPage from '../pages/MenuPage.vue';
 import OfferPage from '../pages/OfferPage.vue';
 
@@ -90,10 +95,15 @@ const routes = [
   },
   {
     path: '/profile',
-    name: 'Profile',
     component: ProfilePage,
     meta: { requiresAuth: true }, // Profile requires authentication
   },
+  // Profile sub-pages as separate routes (render as full pages)
+  { path: '/profile/account', name: 'ProfileAccount', component: ProfileAccount, meta: { requiresAuth: true } },
+  { path: '/profile/settings', name: 'ProfileSettings', component: ProfileSettings, meta: { requiresAuth: true } },
+  { path: '/profile/orders', name: 'ProfileOrders', component: ProfileOrders, meta: { requiresAuth: true } },
+  { path: '/profile/locations', name: 'ProfileLocations', component: ProfileLocations, meta: { requiresAuth: true } },
+  { path: '/profile/change-password', name: 'ProfileChangePassword', component: ProfileChangePassword, meta: { requiresAuth: true } },
   // Catch-all redirect to home
   {
     path: '/:pathMatch(.*)*',
@@ -118,6 +128,8 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('auth_token');
   const isAuthenticated = !!token;
+
+  // (debug logs removed)
 
   // Check if route requires authentication
   if (to.meta.requiresAuth && !isAuthenticated) {

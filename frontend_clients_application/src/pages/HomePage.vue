@@ -425,7 +425,7 @@ onMounted(() => {
 }
 
 .stat-item:hover {
-  transform: translateY(-2px);
+  /* hover transform removed */
 }
 
 .stat-icon {
@@ -443,9 +443,7 @@ onMounted(() => {
 }
 
 .stat-item:hover .stat-icon {
-  transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  border-color: var(--text-secondary);
+  /* hover transform/box-shadow removed */
 }
 
 .stat-icon i {
@@ -516,9 +514,7 @@ onMounted(() => {
 }
 
 .feature-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 30px rgba(255, 215, 0, 0.2);
-  border-color: var(--primary-color);
+  /* hover transform/box-shadow removed */
 }
 
 .feature-icon {
@@ -535,7 +531,7 @@ onMounted(() => {
 }
 
 .feature-card:hover .feature-icon {
-  transform: scale(1.15) rotate(10deg);
+  /* hover transform removed */
 }
 
 .feature-icon i {
@@ -626,7 +622,7 @@ onMounted(() => {
 }
 
 .btn-view-all:hover {
-  transform: translateY(-2px);
+  /* hover transform removed */
 }
 
 /* Promotions Section */
@@ -674,9 +670,7 @@ onMounted(() => {
 }
 
 .promotion-item:hover {
-  background: var(--bg-card);
-  border-left: 4px solid var(--primary-color);
-  box-shadow: inset 0 0 20px rgba(255, 215, 0, 0.1);
+  /* hover styles removed */
 }
 
 .promo-image {
@@ -777,8 +771,7 @@ onMounted(() => {
 }
 
 .btn-offers:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
+  /* hover transform/box-shadow removed */
 }
 
 /* CTA Section */
@@ -844,8 +837,7 @@ onMounted(() => {
 }
 
 .cta-buttons .btn:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
+  /* hover transform/box-shadow removed */
 }
 
 /* Animations */
@@ -1262,18 +1254,14 @@ onMounted(() => {
   transition: background 0.2s, color 0.2s, transform 0.2s;
 }
 .social-icon:hover {
+  /* hover transform removed; keep color change only */
   background: var(--primary-color);
   color: #1a1a1a;
-  transform: translateY(-4px) scale(1.08);
 }
-.social-icon.facebook:hover {
-  box-shadow: 0 4px 16px rgba(59,89,152,0.18);
-}
-.social-icon.instagram:hover {
-  box-shadow: 0 4px 16px rgba(225,48,108,0.18);
-}
+.social-icon.facebook:hover,
+.social-icon.instagram:hover,
 .social-icon.twitter:hover {
-  box-shadow: 0 4px 16px rgba(29,155,209,0.18);
+  /* hover box-shadow removed */
 }
 
 @media (max-width: 576px) {

@@ -83,6 +83,35 @@ const api = {
   },
 
   /**
+   * Get current authenticated user's QR code
+   * Endpoint: GET /users/my-qr-code
+   * Expected response: { qr: 'data:image/png;base64,...' } or { qr_url: 'https://...' }
+   */
+  getMyQrCode() {
+    return apiClient.get('/users/my-qr-code');
+  },
+
+  /**
+   * Get current authenticated user's QR code as binary image and return data URI
+   * Useful when backend returns raw PNG bytes
+   */
+  async getMyQrCodeImage() {
+    const res = await apiClient.get('/users/my-qr-code', { responseType: 'arraybuffer' });
+    const contentType = res.headers['content-type'] || 'image/png';
+    // Convert ArrayBuffer to base64 string
+    const buffer = res.data;
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const chunkSize = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      const chunk = bytes.subarray(i, i + chunkSize);
+      binary += String.fromCharCode.apply(null, chunk);
+    }
+    const base64 = typeof btoa === 'function' ? btoa(binary) : Buffer.from(binary, 'binary').toString('base64');
+    return `data:${contentType};base64,${base64}`;
+  },
+
+  /**
    * Logout user
    */
   logout() {

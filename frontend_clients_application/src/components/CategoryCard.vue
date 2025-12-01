@@ -53,9 +53,7 @@ const viewCategory = () => {
 }
 
 .category-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--primary-color);
-  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.3);
+  /* hover transform/box-shadow removed */
 }
 
 .category-image {
@@ -72,7 +70,7 @@ const viewCategory = () => {
 }
 
 .category-card:hover .category-image img {
-  transform: scale(1.1);
+  /* image scale on hover removed */
 }
 
 .category-overlay {
@@ -96,11 +94,7 @@ const viewCategory = () => {
 }
 
 .category-card:hover .category-overlay {
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 215, 0, 0.4),
-    rgba(0, 0, 0, 0.9)
-  );
+  /* overlay hover background change removed */
 }
 
 .category-name {
@@ -125,7 +119,7 @@ const viewCategory = () => {
 }
 
 .category-card:hover .category-icon {
-  transform: scale(1.2);
+  /* icon hover transform removed */
 }
 
 /* Mobile - Simple style without images */
@@ -138,9 +132,7 @@ const viewCategory = () => {
   }
 
   .category-card:hover {
-    transform: translateY(-2px);
-    border-color: var(--primary-color);
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
+    /* mobile hover transform removed */
   }
 
   .category-image {
@@ -187,7 +179,7 @@ const viewCategory = () => {
   }
 
   .category-card:hover .category-icon {
-    transform: scale(1.1);
+    /* mobile icon hover transform removed */
   }
 }
 

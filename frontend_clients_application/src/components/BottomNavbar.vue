@@ -14,17 +14,46 @@ const navItems = [
   { name: 'home', icon: 'bi-house', label: 'Inicio', route: '/home' },
   { name: 'categories', icon: 'bi-list', label: 'Carta', route: '/menu' },
   { name: 'offers', icon: 'bi-star-fill', label: 'Ofertas', route: '/offer' },
+  // Navigate directly to the account child to avoid empty-path redirect issues
   { name: 'profile', icon: 'bi-person', label: 'Perfil', route: '/profile' },
 ];
 
 // Check if current route is active
 const isActive = (routePath) => {
-  return route.path === routePath;
+  if (!routePath) return false;
+  // Exact match or any nested route under the routePath (e.g. /profile/account)
+  return route.path === routePath || route.path.startsWith(routePath + '/') || route.path.startsWith(routePath);
 };
 
-// Handle navigation
-const handleNavigation = (item) => {
-  router.push(item.route);
+// Handle navigation (robust)
+const handleNavigation = async (item) => {
+  try {
+    if (!item) {
+      console.debug('BottomNavbar: invalid nav item', item);
+      return;
+    }
+
+    // Log click + auth token status for debugging
+    const token = localStorage.getItem('auth_token');
+    // navigation click
+
+    if (!item.route) {
+      console.debug('BottomNavbar: no route defined for', item);
+      return;
+    }
+
+    // Support both string paths and route objects
+    if (typeof item.route === 'string') {
+      await router.push({ path: item.route });
+    } else {
+      await router.push(item.route);
+    }
+
+    // navigation completed
+  } catch (err) {
+    // ignore duplicate navigation errors, log others
+    console.debug('BottomNavbar navigation error', err);
+  }
 };
 </script>
 
@@ -34,8 +63,9 @@ const handleNavigation = (item) => {
       <button
         v-for="item in navItems"
         :key="item.name"
+        type="button"
         :class="['nav-item', { active: isActive(item.route) }]"
-        @click="handleNavigation(item)"
+        @click.prevent="handleNavigation(item)"
       >
         <i :class="['bi', item.icon, 'nav-icon']"></i>
         <span class="nav-label">{{ item.label }}</span>

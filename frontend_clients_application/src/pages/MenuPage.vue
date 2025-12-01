@@ -7,13 +7,8 @@
     @goToCart="handleGoToCart"
   />
   <div class="menu-page">
-    <section class="categories-section bg-dark-section">
-      <div class="section-header text-center mb-5">
-        <div>
-          <h2 class="section-title">Nuestra Carta</h2>
-          <p class="section-subtitle">Descubre nuestras categorías y productos disponibles</p>
-        </div>
-      </div>
+    <section class="categories-section bg-light-section">
+      <!-- Title removed as requested -->
 
       <div v-if="loading" class="loading-state">
         <div class="spinner-border text-warning" role="status">
@@ -148,7 +143,9 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: var(--bg-card);
+  /* lighter grey background for menu page product tiles */
+  background: #2f2f2f;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   margin-bottom: 0.5rem;
@@ -219,7 +216,6 @@ onMounted(async () => {
   overflow-x: hidden;
 }
 .categories-section {
-  padding: 3rem 0 0rem;
   max-width: 1400px;
   margin: 0 auto;
   background: var(--bg-card);
@@ -248,10 +244,16 @@ onMounted(async () => {
   animation: fadeIn 0.6s ease;
 }
 .category-card {
-  background: var(--bg-darker);
-  padding: 1rem 1rem;
+  background: var(--bg-card);
+  padding: 2rem 1rem 1.5rem 1rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  margin-bottom: 0.2rem;
+  margin-bottom: 1rem;
+  /* dark separator between categories */
+  border-bottom: 6px solid var(--bg-darker);
+}
+/* Remove separator for the very last category in the grid to avoid extra bottom stroke */
+.categories-grid .category-card:last-child {
+  border-bottom: none;
 }
 .category-header {
   margin-bottom: 1.5rem;
@@ -275,6 +277,12 @@ onMounted(async () => {
   margin-top: 1rem;
   padding-left: 0;
   padding-right: 0;
+}
+.products-grid ::v-deep .product-card {
+  /* Ensure product cards show a subtle border and lighter background on Menu page only */
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px !important;
+  background: #2f2f2f !important;
 }
 .product-card {
   background: var(--bg-card);

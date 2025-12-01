@@ -7,6 +7,7 @@ use Endroid\QrCode\Writer\PngWriter;
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\RoundBlockSizeMode;
+use Endroid\QrCode\Color\Color;
 use Illuminate\Support\Str;
 
 class QrCodeService
@@ -47,13 +48,19 @@ class QrCodeService
     {
         // Use the base64 data directly (don't decode it)
         // The scanner will read the base64 string, which the API expects
+        // Use zero margin and no round-block margin mode so the generated
+        // PNG has minimal/zero white padding around the QR modules.
+        // Also set a transparent background so clients can render it over any
+        // page background. Alpha uses 0-127 (127 = fully transparent).
         $qrCode = new QrCode(
             data: $data,
             encoding: new Encoding('UTF-8'),
             errorCorrectionLevel: ErrorCorrectionLevel::Low,
             size: 300,
-            margin: 10,
-            roundBlockSizeMode: RoundBlockSizeMode::Margin
+            margin: 0,
+            roundBlockSizeMode: RoundBlockSizeMode::None,
+            foregroundColor: new Color(0, 0, 0),
+            backgroundColor: new Color(255, 255, 255, 127)
         );
 
         $writer = new PngWriter();

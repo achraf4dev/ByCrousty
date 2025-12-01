@@ -17,11 +17,25 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  usePoints: {
+    type: Boolean,
+    default: false,
+  },
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
   imageHeight: {
     type: [String, Number],
     default: null,
   },
+  preventDefaultOnClick: {
+    type: Boolean,
+    default: false,
+  },
 });
+
+const emit = defineEmits(['card-click']);
 
 const router = useRouter();
 const cartStore = useCartStore();
@@ -35,17 +49,32 @@ const formattedPrice = computed(() => {
   return `${Number(props.product.price).toFixed(2)}€`;
 });
 
+const displayedPrice = computed(() => {
+  if (props.usePoints) {
+    const pts = Number(props.product.points || 0);
+    return `${pts} pts`;
+  }
+  return formattedPrice.value;
+});
+
 const isInCart = computed(() => {
   return cartStore.isInCart(props.product.id);
 });
 
 const viewDetails = () => {
+  if (props.preventDefaultOnClick) {
+    console.log('ProductCard: emitting card-click for', props.product?.id || props.product?.name);
+    emit('card-click', props.product);
+    return;
+  }
+
   router.push(`/products/${props.product.id}`);
 };
 
 const addToCart = async (event) => {
   event.stopPropagation();
-  
+  if (props.disabled) return;
+
   const result = await cartStore.addItem(props.product, 1);
   
   if (result.success) {
@@ -57,14 +86,14 @@ const addToCart = async (event) => {
 </script>
 
 <template>
-  <div class="product-card" @click="viewDetails">
+  <div class="product-card" :class="{ 'is-disabled': disabled, 'no-border': usePoints }" @click="disabled ? null : viewDetails" :aria-disabled="disabled">
     <!-- Product Image -->
     <div class="product-image" :style="imageHeight ? { height: typeof imageHeight === 'number' ? imageHeight + 'px' : imageHeight } : {}">
       <img :src="productImage" :alt="product.name" :style="imageHeight ? { height: '100%' } : {}" />
       
-      <!-- Price Tag -->
-      <div class="price-tag">
-        {{ formattedPrice }}
+      <!-- Price Tag (only show in image when not using points) -->
+      <div v-if="!usePoints" class="price-tag">
+        {{ displayedPrice }}
       </div>
 
       <!-- Product Info Overlay -->
@@ -76,6 +105,12 @@ const addToCart = async (event) => {
       </div>
     </div>
 
+    <!-- Points badge (when using points) -->
+    <div v-if="usePoints" :class="['points-centered', { 'points-has-bg': !disabled }]">
+      <i class="bi bi-star-fill" style="margin-right:8px"></i>
+      <span class="pts-text">{{ displayedPrice }}</span>
+    </div>
+
     <!-- Add to Cart Button -->
     <div v-if="!hideAddToCart" class="product-footer">
       <button 
@@ -83,18 +118,20 @@ const addToCart = async (event) => {
         :class="isInCart ? 'btn-success' : 'btn-warning'"
         style="width: 40px; height: 40px;"
         @click="addToCart"
-        :disabled="isInCart"
+        :disabled="isInCart || disabled"
       >
         <i :class="isInCart ? 'bi bi-check' : 'bi bi-cart-plus'"></i>
       </button>
     </div>
+
+    <div v-if="disabled" class="disabled-overlay" aria-hidden="true"></div>
   </div>
 </template>
 
 <style scoped>
 .product-card {
   background: var(--bg-card);
-  border-radius: 12px 12px 0px 0px;
+  border-radius: 0 0 12px 12px;
   overflow: hidden;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -102,13 +139,10 @@ const addToCart = async (event) => {
   height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
-.product-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--primary-color);
-  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.3);
-}
+/* hover transform/box-shadow removed per request */
 
 .product-image {
   position: relative;
@@ -125,9 +159,7 @@ const addToCart = async (event) => {
   transition: transform 0.3s ease;
 }
 
-.product-card:hover .product-image img {
-  transform: scale(1.05);
-}
+/* image scale on hover removed per request */
 
 .price-tag {
   position: absolute;
@@ -136,11 +168,49 @@ const addToCart = async (event) => {
   background: var(--primary-color);
   color: #1a1a1a;
   padding: 0.3rem 0.5rem;
-  border-radius: 0 12px 0 12px;
+  /* remove rounding on top corners */
+  border-radius: 0 0 12px 12px;
   font-size: 0.85rem;
   font-weight: 700;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   z-index: 2;
+}
+
+.price-left {
+  left: 0;
+  right: auto;
+  /* remove top rounding, keep bottom corners rounded */
+  border-radius: 0 0 12px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.points-centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0 auto;
+  background: transparent;
+  color: var(--primary-color);
+  padding: 0.15rem 0.25rem;
+  border-radius: 0;
+  font-weight: 700;
+  box-shadow: none;
+  width: fit-content;
+  z-index: 2;
+}
+
+.pts-text { font-size: 0.95rem; }
+
+.points-has-bg {
+  background: var(--primary-color);
+  color: #1a1a1a;
+  padding: 0.35rem 0.9rem;
+  /* remove top rounding on badge, keep bottom rounding */
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .product-info-overlay {
@@ -183,6 +253,30 @@ const addToCart = async (event) => {
   background: var(--bg-card);
 }
 
+.is-disabled {
+  opacity: 0.65;
+}
+
+.is-disabled .product-footer button {
+  pointer-events: none;
+}
+
+.disabled-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+  font-weight: 700;
+  z-index: 4;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  pointer-events: auto;
+}
+
 .btn-add-cart {
   background: var(--primary-color);
   color: #000;
@@ -208,6 +302,10 @@ const addToCart = async (event) => {
   color: white;
   cursor: not-allowed;
   opacity: 0.8;
+}
+
+.no-border {
+  border: none !important;
 }
 
 /* Tablet */
