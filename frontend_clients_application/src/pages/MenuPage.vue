@@ -37,12 +37,17 @@
                 <button @click="increment(product)" class="qty-btn">+</button>
               </div>
               <div class="add-to-cart-row">
-                    <div class="add-to-cart-row-inner">
-                      <button class="btn btn-warning add-to-cart-btn" @click="addToCart(product)">
-                        <i class="bi bi-cart-plus"></i>
-                      </button>
-                      <span class="add-to-cart-text" @click="addToCart(product)" style="cursor:pointer;">Agregar</span>
-                    </div>
+                <div class="add-to-cart-row-inner">
+                  <div v-if="addToCartLoading[product.id]" class="add-to-cart-loading">
+                    <span class="spinner-border spinner-border-sm text-warning" role="status" aria-hidden="true"></span>
+                  </div>
+                  <div v-else class="add-to-cart-action">
+                    <button class="btn btn-warning add-to-cart-btn" @click="handleAddToCart(product)">
+                      <i class="bi bi-cart-plus"></i>
+                      <span class="add-to-cart-text" style="cursor:pointer;">Agregar</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -97,7 +102,11 @@ function decrement(product) {
   if (!quantities[product.id]) quantities[product.id] = 1;
   if (quantities[product.id] > 1) quantities[product.id]--;
 }
-async function addToCart(product) {
+const addToCartLoading = reactive({});
+
+async function handleAddToCart(product) {
+  if (addToCartLoading[product.id]) return;
+  addToCartLoading[product.id] = true;
   const qty = quantities[product.id] || 1;
   const result = await cartStore.addItem(product, qty);
   if (result.success) {
@@ -107,6 +116,7 @@ async function addToCart(product) {
   } else {
     showError('Error al añadir al carrito');
   }
+  addToCartLoading[product.id] = false;
 }
 function handleContinueShopping() {
   modalVisible.value = false;
@@ -133,11 +143,32 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.btn-warning:hover,
+.btn-warning:focus {
+  background: none !important;
+  color: var(--primary-color) !important;
+  box-shadow: none !important;
+  transform: none !important;
+  border-color: none !important;
+}
+
 .add-to-cart-row-inner {
   display: flex;
   align-items: center;
   gap: 1rem;
   justify-content: center;
+}
+.add-to-cart-action {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.add-to-cart-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 90px;
+  min-height: 38px;
 }
 .product-card-wrapper {
   display: flex;
@@ -171,9 +202,6 @@ onMounted(async () => {
   cursor: pointer;
   transition: background 0.2s;
 }
-.qty-btn:hover {
-  background: #ffd700;
-}
 .qty-value {
   font-size: 1.1rem;
   font-weight: 600;
@@ -193,16 +221,6 @@ onMounted(async () => {
    box-shadow: none;
    transition: color 0.2s, border-color 0.2s;
  }
- .add-to-cart-btn:hover {
-   color: #1a1a1a;
-   border-color: #ffd700;
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 50px;
-}
 .add-to-cart-text {
   font-size: 1rem;
   font-weight: 600;

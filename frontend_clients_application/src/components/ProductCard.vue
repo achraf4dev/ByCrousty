@@ -224,9 +224,6 @@ const addToCart = async (event) => {
   transition: all 0.3s ease;
 }
 
-.product-card:hover .product-info-overlay {
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.7) 70%, transparent 100%);
-}
 
 .product-name {
   font-size: 0.9rem;
@@ -292,10 +289,6 @@ const addToCart = async (event) => {
   font-size: 1.25rem;
 }
 
-.btn-add-cart:hover:not(:disabled) {
-  transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
-}
 
 .btn-add-cart:disabled {
   background: var(--success-color);
